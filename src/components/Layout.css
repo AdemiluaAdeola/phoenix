@@ -1,0 +1,62 @@
+.site-header {
+  background: var(--navy);
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.3);
+}
+
+.site-logo {
+  font-family: 'Playfair Display', serif;
+  color: var(--gold);
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.site-logo span {
+  color: var(--white);
+  font-weight: 400;
+}
+
+.site-nav {
+  display: flex;
+  gap: 28px;
+}
+
+.site-nav a {
+  color: rgba(255,255,255,0.55);
+  text-decoration: none;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  transition: color 0.2s;
+}
+
+.site-nav a:hover, .site-nav a.active {
+  color: var(--gold);
+}
+
+.site-footer {
+  background: var(--navy);
+  color: rgba(255,255,255,0.35);
+  text-align: center;
+  padding: 28px 20px;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  border-top: 2px solid rgba(212,160,86,0.2);
+}
+
+.site-footer span {
+  color: var(--gold);
+}
+
+@media (max-width: 600px) {
+  .site-nav {
+    display: none;
+  }
+}
