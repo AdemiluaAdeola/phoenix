@@ -71,19 +71,26 @@
   border-radius: 10px;
   cursor: pointer;
   text-align: center;
-  transition: all 0.2s;
+  transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
   font-family: 'DM Sans', sans-serif;
 }
 
 .scale-btn:hover {
   border-color: var(--gold);
   background: var(--gold-dim);
+  transform: translateY(-2px);
 }
 
 .scale-btn.selected {
   border-color: var(--navy);
   background: var(--navy);
   color: var(--white);
+  transform: scale(1.06);
+  box-shadow: 0 4px 14px rgba(13,16,40,0.15);
+}
+
+.scale-btn:active {
+  transform: scale(0.95);
 }
 
 .scale-num {
@@ -139,7 +146,7 @@
   height: 100%;
   background: linear-gradient(90deg, var(--navy), var(--gold));
   border-radius: 3px;
-  transition: width 0.4s ease;
+  transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .dimension-label {
@@ -180,6 +187,24 @@
 
 .nav-row .btn-primary {
   flex: 1;
+}
+
+@keyframes intakeCardEntry {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-intake-card {
+  animation: intakeCardEntry 0.5s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+}
+
+@keyframes questionCardEntry {
+  from { opacity: 0; transform: translateY(18px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-question-card {
+  animation: questionCardEntry 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
 }
 
 @media (max-width: 560px) {

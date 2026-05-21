@@ -251,7 +251,7 @@ const ClarityAssessment = ({ navigate }) => {
       </div>
 
       {step === 1 && (
-        <div className="card intake-card">
+        <div className="card intake-card animate-intake-card">
           <h3>Before We Begin</h3>
           <p>Tell us a little about yourself. This helps us personalize your results and ensures your clarity score is saved securely.</p>
           <form onSubmit={handleIntakeSubmit}>
@@ -313,7 +313,7 @@ const ClarityAssessment = ({ navigate }) => {
             <div className="dimension-label">{clarityDimensions[activeQuestion.dim]}</div>
           </div>
 
-          <div className="card question-card">
+          <div key={currentQuestion} className="card question-card animate-question-card">
             <div className="q-number">Question {currentQuestion + 1}</div>
             <div className="q-text">{activeQuestion.text}</div>
             <div className="scale-options">
