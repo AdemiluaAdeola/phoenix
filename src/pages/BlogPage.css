@@ -1,33 +1,4 @@
-.journal-header {
-  background: var(--navy);
-  padding: 64px 32px 56px;
-  text-align: center;
-  border-bottom: 3px solid var(--gold);
-}
-.journal-label {
-  display: inline-block;
-  background: rgba(212,160,86,0.15);
-  border: 1px solid rgba(212,160,86,0.3);
-  color: var(--gold);
-  font-size: 0.72rem;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-  padding: 6px 16px;
-  border-radius: 20px;
-  margin-bottom: 20px;
-}
-.journal-header h1 {
-  font-size: clamp(2rem, 5vw, 3rem);
-  color: var(--white);
-  margin-bottom: 14px;
-}
-.journal-header p {
-  color: rgba(255,255,255,0.55);
-  font-size: 1rem;
-  max-width: 520px;
-  margin: 0 auto;
-}
-
+/* ── JOURNAL STYLES ── */
 .series-intro {
   max-width: 720px;
   margin: 48px auto 0;

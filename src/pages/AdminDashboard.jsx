@@ -89,18 +89,18 @@ const AdminDashboard = () => {
   ];
 
   return (
-    <div className="admin-shell animate-fade-slide">
-      <div className="admin-hero">
-        <div>
-          <div className="admin-kicker">Phoenix Coach Console</div>
-          <h2>Admin Dashboard</h2>
-          <p>Review assessment records, export client data, and manage stories from one focused workspace.</p>
-        </div>
-        <div className="admin-actions">
+    <div className="animate-fade-slide">
+      <div className="hero">
+        <div className="hero-label">Phoenix Coach Console</div>
+        <h1>Admin <em>Dashboard</em></h1>
+        <p>Review assessment records, export client data, and manage stories from one focused workspace.</p>
+        <div className="admin-actions" style={{ marginTop: '12px' }}>
           <button onClick={exportToExcel} className="btn btn-gold">Export {activeTab}</button>
           <button onClick={handleLogout} className="btn btn-secondary">Logout</button>
         </div>
       </div>
+
+      <div className="admin-shell">
 
       <div className="admin-stats">
         <div className="admin-stat-card">
@@ -192,6 +192,7 @@ const AdminDashboard = () => {
             )}
           </tbody>
         </table>
+      </div>
       </div>
     </div>
   );

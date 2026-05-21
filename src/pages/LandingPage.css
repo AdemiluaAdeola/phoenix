@@ -1,0 +1,217 @@
+/* ── LANDING PAGE AESTHETICS ── */
+
+.landing-wrapper {
+  padding-bottom: 60px;
+}
+
+.landing-hero {
+  padding-bottom: 72px;
+}
+
+.landing-hero-buttons {
+  margin-top: 10px;
+}
+
+.about-card {
+  text-align: center;
+  padding: 40px 36px;
+  margin-bottom: 60px;
+  background: var(--white);
+  border: 1px solid var(--ivory-dark);
+}
+
+.about-text {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--charcoal);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* Methodology Section */
+.methodology-section {
+  margin-bottom: 60px;
+  text-align: center;
+}
+
+.section-title {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  color: var(--navy);
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.section-subtitle {
+  color: var(--muted);
+  font-size: 0.98rem;
+  max-width: 520px;
+  margin: 0 auto 36px;
+  line-height: 1.6;
+}
+
+.methodology-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.methodology-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 36px 28px;
+  border: 1px solid var(--ivory-dark);
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.methodology-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--gold);
+}
+
+.step-num {
+  font-family: 'Playfair Display', serif;
+  font-size: 2rem;
+  color: var(--gold-dim);
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 16px;
+}
+
+.methodology-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.35rem;
+  color: var(--navy);
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+
+.methodology-card p {
+  font-size: 0.92rem;
+  line-height: 1.65;
+  color: var(--muted);
+}
+
+/* Quote Block */
+.landing-quote-block {
+  background: var(--gold-dim);
+  border-left: 4px solid var(--gold);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  padding: 40px;
+  margin-bottom: 60px;
+  text-align: left;
+  box-shadow: var(--shadow);
+}
+
+.quote-mark {
+  font-family: 'Playfair Display', serif;
+  font-size: 4rem;
+  color: var(--gold);
+  line-height: 0.2;
+  margin-bottom: 18px;
+  opacity: 0.6;
+}
+
+.quote-text {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.25rem;
+  font-style: italic;
+  color: var(--navy);
+  line-height: 1.75;
+  margin-bottom: 16px;
+}
+
+.quote-author {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--gold);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* CTA Grid */
+.cta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+.cta-grid .cta-card {
+  padding: 36px 32px;
+  text-align: center;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cta-grid .cta-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.45rem;
+  margin-bottom: 12px;
+}
+
+.cta-grid .cta-card p {
+  font-size: 0.92rem;
+  line-height: 1.65;
+  margin-bottom: 24px;
+  max-width: 320px;
+}
+
+.cta-grid .cta-card:first-child {
+  background: var(--white);
+  border: 1px solid var(--ivory-dark);
+}
+
+.cta-grid .cta-card:first-child h3 {
+  color: var(--navy);
+}
+
+.cta-grid .cta-card:first-child p {
+  color: var(--muted);
+}
+
+.cta-grid .cta-card.secondary {
+  background: var(--navy);
+  border: 1px solid rgba(212,160,86,0.1);
+  color: var(--white);
+}
+
+.cta-grid .cta-card.secondary h3 {
+  color: var(--white);
+}
+
+.cta-grid .cta-card.secondary p {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .methodology-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .cta-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .about-card {
+    padding: 32px 24px;
+  }
+
+  .landing-quote-block {
+    padding: 30px;
+  }
+}

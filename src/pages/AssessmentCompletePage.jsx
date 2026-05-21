@@ -121,62 +121,64 @@ const AssessmentCompletePage = () => {
   }, [data]);
 
   return (
-    <div className="container animate-fade-slide">
-      {/* Email Delivery Interactive HUD */}
-      <div className="email-status-card">
-        {emailStatus === 'sending' && (
-          <div className="email-status-inner">
-            <span className="email-status-pulse-dot"></span>
-            <div className="email-status-text-wrap">
-              <strong>Generating Assessment Report...</strong>
-              <span>Preparing detailed dimension scores and emailing to <em>{data.email}</em></span>
-            </div>
-            <div className="email-loading-spinner-wrap">
-              <span className="email-spinner"></span>
-            </div>
-          </div>
-        )}
-        {emailStatus === 'success' && (
-          <div className="email-status-inner success">
-            <div className="email-status-icon">📬</div>
-            <div className="email-status-text-wrap">
-              <strong>Assessment Results Delivered!</strong>
-              <span>A high-fidelity breakdown has been successfully dispatched to <strong>{data.email}</strong>.</span>
-            </div>
-            <button className="email-preview-trigger-btn" onClick={() => setShowEmailPreview(true)}>
-              🔍 Open Email Report Preview
-            </button>
-          </div>
-        )}
-        {emailStatus === 'error' && (
-          <div className="email-status-inner error">
-            <div className="email-status-icon">⚠️</div>
-            <div className="email-status-text-wrap">
-              <strong>Email Delivery Offline</strong>
-              <span>Unable to establish mail servers, but your results have been locally archived.</span>
-            </div>
-            <button className="email-preview-trigger-btn error" onClick={() => setShowEmailPreview(true)}>
-              🔍 Preview Report
-            </button>
-          </div>
-        )}
-      </div>
-
-      <div className="r2-score-hero">
-        <div className="r2-score-label">YOUR PHOENIX CLARITY RESULTS</div>
-        <div className="r2-score-row">
-          <div className="r2-score-big">{animatedScore}</div>
-          <div className="r2-score-denom">out of 100</div>
+    <div className="animate-fade-slide">
+      {/* Dynamic Uniform Score Hero Section */}
+      <div className="hero">
+        <div className="hero-label">YOUR PHOENIX CLARITY RESULTS</div>
+        <div className="score-hero-row">
+          <div className="score-hero-big">{animatedScore}</div>
+          <div className="score-hero-denom">/ 100</div>
         </div>
         <div className="r2-archetype-badge pulse-gold">{archetype.name}</div>
-        <div className="r2-archetype-intro">{archetype.intro}</div>
+        <p className="score-hero-intro">{archetype.intro}</p>
       </div>
 
-      <div className="r2-section">
-        <div className="r2-section-header">
-          <div className="r2-section-title">YOUR FIVE DIMENSIONS</div>
-          <div className="r2-section-sub">Each dimension scored out of 20 — the gold line shows your average across all five.</div>
+      <div className="container">
+        {/* Email Delivery Interactive HUD */}
+        <div className="email-status-card">
+          {emailStatus === 'sending' && (
+            <div className="email-status-inner">
+              <span className="email-status-pulse-dot"></span>
+              <div className="email-status-text-wrap">
+                <strong>Generating Assessment Report...</strong>
+                <span>Preparing detailed dimension scores and emailing to <em>{data.email}</em></span>
+              </div>
+              <div className="email-loading-spinner-wrap">
+                <span className="email-spinner"></span>
+              </div>
+            </div>
+          )}
+          {emailStatus === 'success' && (
+            <div className="email-status-inner success">
+              <div className="email-status-icon">📬</div>
+              <div className="email-status-text-wrap">
+                <strong>Assessment Results Delivered!</strong>
+                <span>A high-fidelity breakdown has been successfully dispatched to <strong>{data.email}</strong>.</span>
+              </div>
+              <button className="email-preview-trigger-btn" onClick={() => setShowEmailPreview(true)}>
+                🔍 Open Email Report Preview
+              </button>
+            </div>
+          )}
+          {emailStatus === 'error' && (
+            <div className="email-status-inner error">
+              <div className="email-status-icon">⚠️</div>
+              <div className="email-status-text-wrap">
+                <strong>Email Delivery Offline</strong>
+                <span>Unable to establish mail servers, but your results have been locally archived.</span>
+              </div>
+              <button className="email-preview-trigger-btn error" onClick={() => setShowEmailPreview(true)}>
+                🔍 Preview Report
+              </button>
+            </div>
+          )}
         </div>
+
+        <div className="r2-section">
+          <div className="r2-section-header">
+            <div className="r2-section-title">YOUR FIVE DIMENSIONS</div>
+            <div className="r2-section-sub">Each dimension scored out of 20 — the gold line shows your average across all five.</div>
+          </div>
         <div className="r2-dimensions">
           {dimScores.map((rawScore, index) => {
             const pct = Math.round((rawScore / 25) * 100);

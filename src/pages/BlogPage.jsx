@@ -4,8 +4,8 @@ import './BlogPage.css';
 const BlogPage = () => {
   return (
     <div className="animate-fade-slide" style={{ paddingBottom: '60px' }}>
-      <div className="journal-header">
-        <div className="journal-label">Coaching Insight Journal</div>
+      <div className="hero">
+        <div className="hero-label">Coaching Insight Journal</div>
         <h1>Three Posts.<br />One Story.</h1>
         <p>Where Phoenix began, how the work evolved, and who it serves now. Read in sequence or enter wherever you are.</p>
       </div>

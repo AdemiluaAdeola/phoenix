@@ -130,25 +130,65 @@ const AssessmentPage = () => {
 
   if (mode === 'coach' && !isUnlocked) {
     return (
-      <div style={{ position: 'fixed', inset: 0, background: 'rgba(13,16,40,0.92)', zIndex: 999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <form onSubmit={handlePasswordSubmit} style={{ background: 'var(--white)', padding: '32px', borderRadius: '12px', textAlign: 'center', width: '300px' }}>
-          <h3 style={{ marginBottom: '16px' }}>Coach Access</h3>
-          <input 
-            type="password" 
-            placeholder="Enter access code" 
-            value={passwordInput}
-            onChange={e => setPasswordInput(e.target.value)}
-            style={{ width: '100%', padding: '10px', marginBottom: '10px', border: '1px solid var(--ivory-dark)', borderRadius: '6px' }}
-          />
-          {passwordError && <div style={{ color: 'var(--red)', fontSize: '0.82rem', marginBottom: '10px' }}>Incorrect code. Try again.</div>}
-          <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Unlock</button>
+      <div className="coach-lock-overlay">
+        <form onSubmit={handlePasswordSubmit} className="coach-lock-card hover-glow">
+          <h3>Coach Access</h3>
+          <p>Please enter the authorization code to unlock readiness and execution assessments.</p>
+          <div className="form-group">
+            <input 
+              type="password" 
+              placeholder="Enter access code" 
+              value={passwordInput}
+              onChange={e => setPasswordInput(e.target.value)}
+              required
+            />
+          </div>
+          {passwordError && <div className="coach-lock-error">Incorrect code. Try again.</div>}
+          <button type="submit" className="btn btn-primary scale-on-hover" style={{ width: '100%' }}>Unlock Dashboard</button>
         </form>
       </div>
     );
   }
 
+  const getHeroContent = () => {
+    switch (activeTab) {
+      case 'clarity':
+        return {
+          label: "See It · Phase 1 of 3",
+          title: <>Clarity <em>Assessment</em></>,
+          desc: "Our 25-question assessment measures your score across 5 key dimensions of clarity and readiness."
+        };
+      case 'testimonial':
+        return {
+          label: "Client Stories",
+          title: <>Share Your <em>Story</em></>,
+          desc: "We want to hear about your transition, shift, and breakthroughs."
+        };
+      case 'readiness':
+        return {
+          label: "Coach Evaluation",
+          title: <>Client <em>Readiness</em></>,
+          desc: "Evaluate the client's capacity, emotional baseline, and commitment to the coaching journey."
+        };
+      case 'execution':
+        return {
+          label: "Coach Evaluation",
+          title: <>Client <em>Execution</em></>,
+          desc: "Assess the client's progress, homework completion, and action alignment."
+        };
+      default:
+        return {
+          label: "Assessment Portal",
+          title: <>Phoenix <em>Assessment</em></>,
+          desc: "Discover where you stand and map your next transition."
+        };
+    }
+  };
+
+  const heroContent = getHeroContent();
+
   return (
-    <div>
+    <div className="animate-fade-slide">
       <div className="assessment-tab-nav">
         <button className={`assessment-tab-btn ${activeTab === 'clarity' ? 'active' : ''}`} onClick={() => setActiveTab('clarity')}>Clarity Assessment</button>
         {(isUnlocked || share === 'story') && (
@@ -162,7 +202,13 @@ const AssessmentPage = () => {
         )}
       </div>
 
-      <div className="container animate-fade-slide">
+      <div className="hero">
+        <div className="hero-label">{heroContent.label}</div>
+        <h1>{heroContent.title}</h1>
+        <p>{heroContent.desc}</p>
+      </div>
+
+      <div className="container">
         {activeTab === 'clarity' && <ClarityAssessment navigate={navigate} />}
         {activeTab === 'testimonial' && <TestimonialForm navigate={navigate} />}
         {activeTab === 'readiness' && <GenericAssessment title="Client Readiness" type="readiness" questions={readinessQuestions} />}
