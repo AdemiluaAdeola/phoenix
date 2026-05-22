@@ -56,7 +56,7 @@ export default function Assessment() {
   )
   const activeDimension = useMemo(
     () => (step > 0 && step <= totalQuestions ? dimensions[Math.floor((step - 1) / 5)] : ''),
-    [step]
+    [step, totalQuestions]
   )
 
   function handleRating(value) {

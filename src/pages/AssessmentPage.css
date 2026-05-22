@@ -1,7 +1,9 @@
 .assessment-tab-nav {
   background: var(--navy);
-  border-top: 1px solid rgba(212,160,86,0.2);
+  border-top: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 3px solid var(--gold);
   display: flex;
+  justify-content: center;
   overflow-x: auto;
   scrollbar-width: none;
 }
@@ -11,17 +13,16 @@
 }
 
 .assessment-tab-btn {
-  flex: 1;
+  flex: 0 0 auto;
   min-width: 160px;
-  padding: 16px 20px;
+  padding: 15px 10px 14px;
   background: none;
   border: none;
-  border-bottom: 3px solid transparent;
-  color: rgba(255,255,255,0.45);
+  color: rgba(255,255,255,0.48);
   font-family: 'DM Sans', sans-serif;
-  font-size: 0.82rem;
-  font-weight: 500;
-  letter-spacing: 0.06em;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
   text-transform: uppercase;
   cursor: pointer;
   transition: all 0.25s;
@@ -34,8 +35,23 @@
 
 .assessment-tab-btn.active {
   color: var(--gold);
-  border-bottom-color: var(--gold);
-  background: rgba(212,160,86,0.06);
+  background: transparent;
+}
+
+.assessment-tab-btn:first-child::after {
+  content: 'FREE';
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(212,160,86,0.16);
+  color: var(--gold);
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  vertical-align: middle;
 }
 
 .q-number {
@@ -266,4 +282,3 @@
   margin-bottom: 16px;
   border: 1px solid rgba(139, 38, 53, 0.12);
 }
-

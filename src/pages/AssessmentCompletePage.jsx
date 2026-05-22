@@ -45,17 +45,8 @@ const AssessmentCompletePage = () => {
   const location = useLocation();
   const data = location.state;
 
-  if (!data) {
-    return (
-      <div className="container">
-        <p>No assessment data found. Please take the assessment first.</p>
-        <Link to="/assessment" className="btn btn-primary">Take Assessment</Link>
-      </div>
-    );
-  }
-
-  const dimScores = data.dimScores || [0, 0, 0, 0, 0];
-  const archetype = archetypes[data.archetype] || archetypes.awakening;
+  const dimScores = data?.dimScores || [0, 0, 0, 0, 0];
+  const archetype = archetypes[data?.archetype] || archetypes.awakening;
   const avgScore = Math.round(dimScores.reduce((a, b) => a + b, 0) / 5);
   const avgPct = Math.round((avgScore / 25) * 100);
   const maxIdx = dimScores.indexOf(Math.max(...dimScores));
@@ -65,12 +56,16 @@ const AssessmentCompletePage = () => {
   // 1. Count Up Score Animation
   const [animatedScore, setAnimatedScore] = useState(0);
   useEffect(() => {
+    if (!data) {
+      return undefined;
+    }
+
     let start = 0;
     const end = data.score;
-    if (start === end) {
-      setAnimatedScore(end);
-      return;
+    if (end <= 0) {
+      return undefined;
     }
+
     const duration = 1200; // ms
     const increment = end / (duration / 16);
     const timer = setInterval(() => {
@@ -83,7 +78,7 @@ const AssessmentCompletePage = () => {
       }
     }, 16);
     return () => clearInterval(timer);
-  }, [data.score]);
+  }, [data]);
 
   // 2. Grow Fills for Dimension Bars
   const [animateBars, setAnimateBars] = useState(false);
@@ -99,6 +94,10 @@ const AssessmentCompletePage = () => {
   const [showEmailPreview, setShowEmailPreview] = useState(false);
 
   useEffect(() => {
+    if (!data) {
+      return undefined;
+    }
+
     let active = true;
     const send = async () => {
       try {
@@ -119,6 +118,15 @@ const AssessmentCompletePage = () => {
       active = false;
     };
   }, [data]);
+
+  if (!data) {
+    return (
+      <div className="container">
+        <p>No assessment data found. Please take the assessment first.</p>
+        <Link to="/assessment" className="btn btn-primary">Take Assessment</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="animate-fade-slide">
@@ -363,6 +371,7 @@ const AssessmentCompletePage = () => {
           </div>
         </div>
       )}
+    </div>
     </div>
   );
 };

@@ -40,63 +40,6 @@ a {
   text-decoration: none;
 }
 
-.site-header {
-  background: var(--navy);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 18px 32px;
-  position: sticky;
-  top: 0;
-  z-index: 100;
-  box-shadow: 0 6px 28px rgba(0, 0, 0, 0.18);
-}
-
-.site-brand {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.site-logo {
-  font-family: 'Playfair Display', serif;
-  color: var(--gold);
-  font-size: 1.35rem;
-  font-weight: 700;
-}
-
-.site-logo span {
-  color: #fff;
-  font-weight: 400;
-}
-
-.header-tagline {
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 0.8rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-}
-
-.site-nav {
-  display: flex;
-  gap: 28px;
-  flex-wrap: wrap;
-}
-
-.nav-link {
-  color: rgba(255, 255, 255, 0.72);
-  font-size: 0.82rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  transition: color 0.2s ease;
-}
-
-.nav-link:hover,
-.nav-link.active {
-  color: var(--gold);
-}
-
 .hero {
   background: linear-gradient(135deg, var(--navy) 0%, #1a1f4e 60%, var(--navy) 100%);
   color: var(--white);
@@ -605,4 +548,3 @@ textarea {
     padding: 28px 18px 60px;
   }
 }
-
