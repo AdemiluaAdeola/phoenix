@@ -10,7 +10,7 @@ const LoginPage = () => {
 
   const handleLogin = (e) => {
     e.preventDefault();
-    if (username === 'phoenix' && password === 'phoenix2025') {
+    if (username === 'phoenix' && password === 'phoenix2026') {
       localStorage.setItem('isAuthenticated', 'true');
       navigate('/admin');
     } else {
