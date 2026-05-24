@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
+import LandingPage from './pages/LandingPage';
 import AssessmentPage from './pages/AssessmentPage';
 import AssessmentCompletePage from './pages/AssessmentCompletePage';
 import BlogPage from './pages/BlogPage';
@@ -11,7 +12,7 @@ function App() {
   return (
     <Layout>
       <Routes>
-        <Route path="/" element={<AssessmentPage />} />
+        <Route path="/" element={<LandingPage />} />
         <Route path="/assessment" element={<AssessmentPage />} />
         <Route path="/assessment-complete" element={<AssessmentCompletePage />} />
         <Route path="/blog" element={<BlogPage />} />

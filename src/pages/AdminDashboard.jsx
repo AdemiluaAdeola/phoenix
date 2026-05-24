@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { db } from '../db';
+import { listAssessments, listTestimonials, updateTestimonialStatus } from '../api/dbClient';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -20,10 +20,13 @@ const AdminDashboard = () => {
   }, [navigate]);
 
   const getData = useCallback(async () => {
-    if (activeTab === 'clarity') return db.assessments.toArray();
-    if (activeTab === 'readiness') return db.readiness.toArray();
-    if (activeTab === 'execution') return db.execution.toArray();
-    if (activeTab === 'testimonials') return db.testimonials.toArray();
+    if (activeTab === 'clarity' || activeTab === 'readiness' || activeTab === 'execution') {
+      // Backend currently persists only the Assessment table.
+      return listAssessments();
+    }
+    if (activeTab === 'testimonials') {
+      return listTestimonials();
+    }
     return [];
   }, [activeTab]);
 
@@ -61,12 +64,12 @@ const AdminDashboard = () => {
   };
 
   const approveTestimonial = async (id) => {
-    await db.testimonials.update(id, { status: 'Approved' });
+    await updateTestimonialStatus(id, 'Approved');
     setData(await getData());
   };
 
   const rejectTestimonial = async (id) => {
-    await db.testimonials.update(id, { status: 'Rejected' });
+    await updateTestimonialStatus(id, 'Rejected');
     setData(await getData());
   };
 

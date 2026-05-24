@@ -1,0 +1,97 @@
+import { Link } from 'react-router-dom';
+import './LandingPage.css';
+
+const platformCards = [
+  {
+    title: 'Clarity Assessment',
+    badge: 'Free',
+    phase: 'See It',
+    body: 'A 25-question assessment across five dimensions of clarity, designed to show where you are and what your next chapter requires.',
+    to: '/assessment',
+    action: 'Begin Assessment'
+  },
+  {
+    title: 'Readiness Assessment',
+    badge: 'Coach',
+    phase: 'Believe It',
+    body: 'An internal coach evaluation for identity confidence, emotional capacity, and commitment before deeper transformation work.',
+    to: '/assessment?mode=coach',
+    action: 'Coach Access'
+  },
+  {
+    title: 'Execution Assessment',
+    badge: 'Week 3',
+    phase: 'Achieve It',
+    body: 'A progress check for follow-through, aligned action, resilience, and the client’s ability to sustain momentum.',
+    to: '/assessment?mode=coach',
+    action: 'Open Dashboard'
+  }
+];
+
+const LandingPage = () => {
+  return (
+    <div className="landing-page animate-fade-slide">
+      <nav className="landing-tab-nav" aria-label="Assessment platform navigation">
+        <Link className="landing-tab-btn active" to="/assessment">
+          Clarity Assessment <span className="landing-tab-badge">Free</span>
+        </Link>
+        <Link className="landing-tab-btn" to="/assessment?mode=coach">
+          Readiness Assessment <span className="landing-tab-badge">Coach</span>
+        </Link>
+        <Link className="landing-tab-btn" to="/assessment?mode=coach">
+          Execution Assessment <span className="landing-tab-badge">Week 3</span>
+        </Link>
+        <Link className="landing-tab-btn" to="/client-stories">
+          Client Stories
+        </Link>
+      </nav>
+
+      <section className="hero landing-hero">
+        <div className="hero-label">See It · Phase 1 of 3</div>
+        <h1>The Phoenix<br /><em>Clarity Assessment</em></h1>
+        <p>25 questions. 7 minutes. A clear picture of where you are and what your next chapter actually requires.</p>
+        <div className="landing-hero-meta">
+          <span><span className="dot"></span>25 Questions</span>
+          <span><span className="dot"></span>5 Dimensions</span>
+          <span><span className="dot"></span>Free · No obligation</span>
+        </div>
+        <div className="landing-hero-actions">
+          <Link to="/assessment" className="btn btn-gold">Begin My Clarity Assessment</Link>
+          <Link to="/blog" className="btn btn-secondary">Read the Phoenix Blog</Link>
+        </div>
+      </section>
+
+      <section className="landing-container" aria-label="Phoenix assessment platform">
+        <div className="landing-section-heading">
+          <span>Assessment Platform</span>
+          <h2>Built around the See It, Believe It, Achieve It journey.</h2>
+        </div>
+
+        <div className="landing-card-grid">
+          {platformCards.map((card) => (
+            <article className="landing-card" key={card.title}>
+              <div className="landing-card-topline">
+                <span>{card.phase}</span>
+                <strong>{card.badge}</strong>
+              </div>
+              <h3>{card.title}</h3>
+              <p>{card.body}</p>
+              <Link to={card.to} className="landing-card-link">{card.action} →</Link>
+            </article>
+          ))}
+        </div>
+
+        <div className="landing-callout">
+          <div>
+            <span>Client Stories</span>
+            <h2>Capture transformation in the client’s own words.</h2>
+            <p>Use the story form after a program or breakthrough moment so testimonials can be reviewed before publishing.</p>
+          </div>
+          <Link to="/assessment?share=story" className="btn btn-primary">Share a Story</Link>
+        </div>
+      </section>
+    </div>
+  );
+};
+
+export default LandingPage;

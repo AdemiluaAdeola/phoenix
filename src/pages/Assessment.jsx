@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import db from '../db'
+import { createAssessment } from '../api/dbClient'
 
 const dimensions = [
   'Strengths & Skills',
@@ -99,7 +99,7 @@ export default function Assessment() {
 
   async function handleSubmit() {
     const score = computeScore(answers)
-    await db.assessments.add({
+    await createAssessment({
       firstName,
       lastName,
       email,
@@ -108,7 +108,8 @@ export default function Assessment() {
       context,
       responses: answers,
       score,
-      createdAt: new Date()
+      archetype: null,
+      createdAt: new Date().toISOString()
     })
     setSubmitted(true)
     setStep(totalQuestions + 1)

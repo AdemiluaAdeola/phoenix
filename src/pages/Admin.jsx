@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import db from '../db'
 import { exportAssessmentsToExcel } from '../utils/exportExcel'
 
-const COACH_CODE = 'phoenixcoach'
+const COACH_CODE = 'phoenix2026'
 
 export default function Admin() {
   const [items, setItems] = useState([])
