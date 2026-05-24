@@ -49,14 +49,17 @@ const LandingPage = () => {
       <section className="hero landing-hero">
         <div className="hero-label">See It · Phase 1 of 3</div>
         <h1>The Phoenix<br /><em>Clarity Assessment</em></h1>
-        <p>25 questions. 7 minutes. A clear picture of where you are and what your next chapter actually requires.</p>
+        <p>
+          25 questions. ~7 minutes. You’ll get a clear snapshot of where you are right now
+          — and what your next chapter actually requires.
+        </p>
         <div className="landing-hero-meta">
           <span><span className="dot"></span>25 Questions</span>
           <span><span className="dot"></span>5 Dimensions</span>
           <span><span className="dot"></span>Free · No obligation</span>
         </div>
         <div className="landing-hero-actions">
-          <Link to="/assessment" className="btn btn-gold">Begin My Clarity Assessment</Link>
+          <Link to="/assessment" className="btn btn-gold">Begin My Clarity Assessment →</Link>
           <Link to="/blog" className="btn btn-secondary">Read the Phoenix Blog</Link>
         </div>
       </section>
@@ -65,6 +68,9 @@ const LandingPage = () => {
         <div className="landing-section-heading">
           <span>Assessment Platform</span>
           <h2>Built around the See It, Believe It, Achieve It journey.</h2>
+          <p style={{ marginTop: 12, color: 'var(--muted)', lineHeight: 1.7, fontSize: '0.95rem' }}>
+            Start in under 10 minutes. Your results show your clarity across five dimensions—then we map the next aligned step.
+          </p>
         </div>
 
         <div className="landing-card-grid">

@@ -226,12 +226,37 @@
 @media (max-width: 560px) {
   .scale-options {
     flex-direction: column;
+    gap: 12px;
+  }
+
+  .scale-btn {
+    min-height: 58px;
+    padding: 16px 10px;
+  }
+
+  .scale-num {
+    font-size: 1.1rem;
   }
 
   .nav-row {
     flex-direction: column;
   }
+
+  .nav-row .btn-primary,
+  .nav-row .btn-secondary {
+    width: 100%;
+  }
+
+  .progress-wrap {
+    padding: 18px 16px;
+  }
+
+  .q-text {
+    font-size: 1.05rem;
+    margin-bottom: 18px;
+  }
 }
+
 
 /* Coach access passcode styles */
 .coach-lock-overlay {

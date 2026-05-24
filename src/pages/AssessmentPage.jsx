@@ -209,10 +209,19 @@ const AssessmentPage = () => {
       </div>
 
       <div className="container">
-        {activeTab === 'clarity' && <ClarityAssessment navigate={navigate} />}
-        {activeTab === 'testimonial' && <TestimonialForm navigate={navigate} />}
-        {activeTab === 'readiness' && <GenericAssessment title="Client Readiness" type="readiness" questions={readinessQuestions} />}
-        {activeTab === 'execution' && <GenericAssessment title="Client Execution" type="execution" questions={executionQuestions} />}
+        {/* Keep tab components mounted so forms aren't removed when switching tabs */}
+        <div style={{ display: activeTab === 'clarity' ? 'block' : 'none' }}>
+          <ClarityAssessment navigate={navigate} />
+        </div>
+        <div style={{ display: activeTab === 'testimonial' ? 'block' : 'none' }}>
+          <TestimonialForm navigate={navigate} />
+        </div>
+        <div style={{ display: activeTab === 'readiness' ? 'block' : 'none' }}>
+          <GenericAssessment title="Client Readiness" type="readiness" questions={readinessQuestions} />
+        </div>
+        <div style={{ display: activeTab === 'execution' ? 'block' : 'none' }}>
+          <GenericAssessment title="Client Execution" type="execution" questions={executionQuestions} />
+        </div>
       </div>
     </div>
   );

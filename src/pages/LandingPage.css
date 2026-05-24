@@ -202,11 +202,39 @@
 }
 
 @media (max-width: 560px) {
+  .landing-container {
+    padding: 28px 16px 56px;
+  }
+
   .landing-hero {
-    padding: 44px 20px 48px;
+    padding: 36px 16px 40px;
+  }
+
+  .landing-tab-btn {
+    min-width: 140px;
+    padding: 12px 10px 11px;
+  }
+
+  .landing-hero-actions {
+    gap: 10px;
   }
 
   .landing-hero-actions .btn {
     width: 100%;
   }
+
+  .landing-card {
+    padding: 20px;
+    min-height: unset;
+  }
+
+  .landing-callout {
+    padding: 22px 18px;
+  }
+
+  .landing-section-heading h2,
+  .landing-callout h2 {
+    line-height: 1.15;
+  }
 }
+
