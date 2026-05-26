@@ -1,8 +1,17 @@
-const SUPABASE_URL = "https://supabase.com/dashboard/project/kmrambclpujmnyxbfkjh"
-  import.meta.env.VITE_SUPABASE_URL || '';
+// Supports both Vite (browser) and plain Node (for smoke tests).
+const SUPABASE_URL =
+  // Vite/browser
+  (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_SUPABASE_URL) ||
+  // Node/smoke test
+  process.env.SUPABASE_URL ||
+  // Fallback: REST host (preferred over dashboard URL)
+  'https://kmrambclpujmnyxbfkjh.supabase.co';
 
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttcmFtYmNscHVqbW55eGJma2poIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NzMyNjcsImV4cCI6MjA5NTE0OTI2N30.o9Yyoqbk9uPRVaHyg1lrCGEBNHOZyQzgzZZYQD7R8lA"
-  import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const SUPABASE_ANON_KEY =
+  (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_SUPABASE_ANON_KEY) ||
+  process.env.SUPABASE_ANON_KEY ||
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttcmFtYmNscHVqbW55eGJma2poIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NzMyNjcsImV4cCI6MjA5NTE0OTI2N30.o9Yyoqbk9uPRVaHyg1lrCGEBNHOZyQzgzZZYQD7R8lA';
+
 
 function assertConfigured() {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
@@ -47,8 +56,9 @@ async function supabaseFetch(path, { method = 'GET', headers = {}, body } = {}) 
 export async function createAssessment(payload) {
   // POST /rest/v1/<table>
   const row = {
-    firstName: payload.firstName,
-    lastName: payload.lastName,
+    first_name: payload.firstName,
+    last_name: payload.lastName,
+
     email: payload.email,
     identity: payload.identity ?? null,
     source: payload.source ?? null,
@@ -56,7 +66,9 @@ export async function createAssessment(payload) {
     responses: payload.responses ?? [],
     score: Number(payload.score ?? 0),
     archetype: payload.archetype ?? null,
-    createdAt: payload.createdAt ?? new Date().toISOString()
+    // DB column is created_at (snake_case). Let DB default if not provided.
+    created_at: payload.createdAt ?? new Date().toISOString()
+
   }
 
   return supabaseFetch(`/rest/v1/assessments?select=*`, {
@@ -70,7 +82,7 @@ export async function createAssessment(payload) {
 
 export async function listAssessments() {
   return supabaseFetch(
-    `/rest/v1/assessments?select=*&order=createdAt.desc`
+    `/rest/v1/assessments?select=*&order=created_at.desc`
   )
 }
 
@@ -81,8 +93,8 @@ export async function listAssessments() {
  */
 export async function listTestimonials({ status } = {}) {
   const query = status
-    ? `/rest/v1/testimonials?select=*&status=eq.${encodeURIComponent(status)}&order=createdAt.desc`
-    : `/rest/v1/testimonials?select=*&order=createdAt.desc`
+    ? `/rest/v1/testimonials?select=*&status=eq.${encodeURIComponent(status)}&order=created_at.desc`
+    : `/rest/v1/testimonials?select=*&order=created_at.desc`
   return supabaseFetch(query)
 }
 

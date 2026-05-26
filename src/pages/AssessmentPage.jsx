@@ -3,6 +3,29 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { db } from '../db';
 import './AssessmentPage.css';
 
+
+function MobileFieldGroup({ title, children }) {
+  const [open, setOpen] = useState(false);
+
+  return (
+    <div className="mobile-field-group">
+      <button
+        type="button"
+        className="mobile-field-toggle"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+      >
+        <span className="mobile-field-title">{title}</span>
+        <span className="mobile-field-caret">▾</span>
+      </button>
+
+      <div className={`mobile-field-panel ${open ? 'open' : ''}`}>{children}</div>
+    </div>
+  );
+}
+
+
+
 const clarityDimensions = [
   "Strengths & Skills",
   "Values & What Matters",
@@ -134,6 +157,18 @@ const AssessmentPage = () => {
         <form onSubmit={handlePasswordSubmit} className="coach-lock-card hover-glow">
           <h3>Coach Access</h3>
           <p>Please enter the authorization code to unlock readiness and execution assessments.</p>
+
+          <div className="coach-lock-actions-top">
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => navigate('/')}
+              style={{ width: '100%' }}
+            >
+              ← Back to Landing
+            </button>
+          </div>
+
           <div className="form-group">
             <input 
               type="password" 
@@ -149,6 +184,7 @@ const AssessmentPage = () => {
       </div>
     );
   }
+
 
   const getHeroContent = () => {
     switch (activeTab) {
@@ -309,51 +345,115 @@ const ClarityAssessment = ({ navigate }) => {
         <div className="card intake-card animate-intake-card">
           <h3>Before We Begin</h3>
           <p>Tell us a little about yourself. This helps us personalize your results and ensures your clarity score is saved securely.</p>
+
           <form onSubmit={handleIntakeSubmit}>
-            <div className="form-row">
-              <div className="form-group">
-                <label>First Name *</label>
-                <input required type="text" placeholder="Your first name" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} />
+            {/* Desktop */}
+            <div className="desktop-only">
+              <div className="form-row">
+                <div className="form-group">
+                  <label>First Name *</label>
+                  <input required type="text" placeholder="Your first name" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} />
+                </div>
+                <div className="form-group">
+                  <label>Last Name *</label>
+                  <input required type="text" placeholder="Your last name" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} />
+                </div>
               </div>
               <div className="form-group">
-                <label>Last Name *</label>
-                <input required type="text" placeholder="Your last name" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} />
+                <label>Email Address *</label>
+                <input required type="email" placeholder="your@email.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label>How do you identify? (optional)</label>
+                <select value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})}>
+                  <option value="">Prefer not to say</option>
+                  <option>She/Her</option>
+                  <option>He/Him</option>
+                  <option>They/Them</option>
+                  <option>Other / Self-describe</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>How did you hear about Phoenix?</label>
+                <select value={formData.source} onChange={e => setFormData({...formData, source: e.target.value})}>
+                  <option value="">Select one...</option>
+                  <option>EPIC Live Stream</option>
+                  <option>Referral from friend or colleague</option>
+                  <option>Social media (TikTok, Instagram, LinkedIn)</option>
+                  <option>Website search</option>
+                  <option>Discovery call</option>
+                  <option>Other</option>
+                </select>
+              </div>
+              <div className="form-group">
+                <label>What brings you here today? (optional)</label>
+                <textarea rows="3" placeholder="A few words about what's bringing you to this moment..." value={formData.context} onChange={e => setFormData({...formData, context: e.target.value})}></textarea>
               </div>
             </div>
-            <div className="form-group">
-              <label>Email Address *</label>
-              <input required type="email" placeholder="your@email.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+
+            {/* Mobile */}
+            <div className="mobile-only">
+              <MobileFieldGroup title="First & Last Name">
+                <div className="form-row">
+                  <div className="form-group">
+                    <label>First Name *</label>
+                    <input required type="text" placeholder="Your first name" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} />
+                  </div>
+                  <div className="form-group">
+                    <label>Last Name *</label>
+                    <input required type="text" placeholder="Your last name" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} />
+                  </div>
+                </div>
+              </MobileFieldGroup>
+
+              <MobileFieldGroup title="Email Address">
+                <div className="form-group">
+                  <label>Email Address *</label>
+                  <input required type="email" placeholder="your@email.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+                </div>
+              </MobileFieldGroup>
+
+              <MobileFieldGroup title="Identify (optional)">
+                <div className="form-group">
+                  <label>How do you identify? (optional)</label>
+                  <select value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})}>
+                    <option value="">Prefer not to say</option>
+                    <option>She/Her</option>
+                    <option>He/Him</option>
+                    <option>They/Them</option>
+                    <option>Other / Self-describe</option>
+                  </select>
+                </div>
+              </MobileFieldGroup>
+
+              <MobileFieldGroup title="Where you heard about Phoenix">
+                <div className="form-group">
+                  <label>How did you hear about Phoenix?</label>
+                  <select value={formData.source} onChange={e => setFormData({...formData, source: e.target.value})}>
+                    <option value="">Select one...</option>
+                    <option>EPIC Live Stream</option>
+                    <option>Referral from friend or colleague</option>
+                    <option>Social media (TikTok, Instagram, LinkedIn)</option>
+                    <option>Website search</option>
+                    <option>Discovery call</option>
+                    <option>Other</option>
+                  </select>
+                </div>
+              </MobileFieldGroup>
+
+              <MobileFieldGroup title="What brings you here? (optional)">
+                <div className="form-group">
+                  <label>What brings you here today? (optional)</label>
+                  <textarea rows="3" placeholder="A few words about what's bringing you to this moment..." value={formData.context} onChange={e => setFormData({...formData, context: e.target.value})}></textarea>
+                </div>
+              </MobileFieldGroup>
             </div>
-            <div className="form-group">
-              <label>How do you identify? (optional)</label>
-              <select value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})}>
-                <option value="">Prefer not to say</option>
-                <option>She/Her</option>
-                <option>He/Him</option>
-                <option>They/Them</option>
-                <option>Other / Self-describe</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>How did you hear about Phoenix?</label>
-              <select value={formData.source} onChange={e => setFormData({...formData, source: e.target.value})}>
-                <option value="">Select one...</option>
-                <option>EPIC Live Stream</option>
-                <option>Referral from friend or colleague</option>
-                <option>Social media (TikTok, Instagram, LinkedIn)</option>
-                <option>Website search</option>
-                <option>Discovery call</option>
-                <option>Other</option>
-              </select>
-            </div>
-            <div className="form-group">
-              <label>What brings you here today? (optional)</label>
-              <textarea rows="3" placeholder="A few words about what's bringing you to this moment..." value={formData.context} onChange={e => setFormData({...formData, context: e.target.value})}></textarea>
-            </div>
-            <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Begin My Clarity Assessment →</button>
+
+            <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: 16 }}>Begin My Clarity Assessment →</button>
           </form>
         </div>
       )}
+
 
       {step === 2 && (
         <div className="assessment-questions">
@@ -424,12 +524,27 @@ const GenericAssessment = ({ title, type, questions }) => {
     <>
       <div className="card intake-card">
         <h3>{title}</h3>
-        <div className="form-row" style={{ marginTop: '16px' }}>
-          <input placeholder="Client First Name" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
-          <input placeholder="Client Last Name" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
+
+        {/* Desktop */}
+        <div className="desktop-only">
+          <div className="form-row" style={{ marginTop: '16px' }}>
+            <input placeholder="Client First Name" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
+            <input placeholder="Client Last Name" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
+          </div>
+        </div>
+
+        {/* Mobile */}
+        <div className="mobile-only">
+          <MobileFieldGroup title="Client Name">
+            <div className="form-row">
+              <input placeholder="Client First Name" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px', width: '100%' }} />
+              <input placeholder="Client Last Name" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px', width: '100%' }} />
+            </div>
+          </MobileFieldGroup>
         </div>
       </div>
       <div className="assessment-questions">
+
         {questions.map((q, i) => (
           <div key={i} className="card question-card">
             <div className="q-number">Question {i + 1}</div>
@@ -471,56 +586,133 @@ const TestimonialForm = ({ navigate }) => {
       <h3>Share Your Story</h3>
       <p style={{ marginBottom: '20px', color: 'var(--muted)' }}>We want to hear about your transformation.</p>
       <form onSubmit={handleSubmit}>
-        <div className="form-row">
-          <div className="form-group">
-            <label>First Name</label>
-            <input required type="text" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} />
+        {/* Desktop */}
+        <div className="desktop-only">
+          <div className="form-row">
+            <div className="form-group">
+              <label>First Name</label>
+              <input required type="text" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} />
+            </div>
+            <div className="form-group">
+              <label>Last Name</label>
+              <input required type="text" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} />
+            </div>
           </div>
           <div className="form-group">
-            <label>Last Name</label>
-            <input required type="text" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} />
+            <label>Email (For follow-up, won't be displayed)</label>
+            <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
           </div>
-        </div>
-        <div className="form-group">
-          <label>Email (For follow-up, won't be displayed)</label>
-          <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-        </div>
-        <div className="form-row">
-          <div className="form-group">
-            <label>Role / Profession (Optional)</label>
-            <input type="text" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} />
+          <div className="form-row">
+            <div className="form-group">
+              <label>Role / Profession (Optional)</label>
+              <input type="text" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} />
+            </div>
+            <div className="form-group">
+              <label>Stage</label>
+              <select value={formData.stage} onChange={e => setFormData({...formData, stage: e.target.value})}>
+                <option value="">Select Stage...</option>
+                <option value="Awakening">Awakening</option>
+                <option value="Dreaming">Dreaming</option>
+                <option value="Phoenix Momentum">Phoenix Momentum</option>
+              </select>
+            </div>
           </div>
           <div className="form-group">
-            <label>Stage</label>
-            <select value={formData.stage} onChange={e => setFormData({...formData, stage: e.target.value})}>
-              <option value="">Select Stage...</option>
-              <option value="Awakening">Awakening</option>
-              <option value="Dreaming">Dreaming</option>
-              <option value="Phoenix Momentum">Phoenix Momentum</option>
+            <label>Before (Where were you when you started?)</label>
+            <textarea required rows="3" value={formData.before} onChange={e => setFormData({...formData, before: e.target.value})}></textarea>
+          </div>
+          <div className="form-group">
+            <label>The Shift (What changed during the work?)</label>
+            <textarea required rows="3" value={formData.shift} onChange={e => setFormData({...formData, shift: e.target.value})}></textarea>
+          </div>
+          <div className="form-group">
+            <label>After (What are you doing now?)</label>
+            <textarea required rows="3" value={formData.after} onChange={e => setFormData({...formData, after: e.target.value})}></textarea>
+          </div>
+          <div className="form-group">
+            <label>Display as Anonymous?</label>
+            <select value={formData.anonymous} onChange={e => setFormData({...formData, anonymous: e.target.value})}>
+              <option value="No">No, use my name</option>
+              <option value="Yes">Yes, keep it anonymous</option>
             </select>
           </div>
         </div>
-        <div className="form-group">
-          <label>Before (Where were you when you started?)</label>
-          <textarea required rows="3" value={formData.before} onChange={e => setFormData({...formData, before: e.target.value})}></textarea>
+
+        {/* Mobile */}
+        <div className="mobile-only">
+          <MobileFieldGroup title="Name">
+            <div className="form-row">
+              <div className="form-group">
+                <label>First Name</label>
+                <input required type="text" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label>Last Name</label>
+                <input required type="text" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} />
+              </div>
+            </div>
+          </MobileFieldGroup>
+
+          <MobileFieldGroup title="Email">
+            <div className="form-group">
+              <label>Email (For follow-up, won't be displayed)</label>
+              <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+            </div>
+          </MobileFieldGroup>
+
+          <MobileFieldGroup title="Role & Stage">
+            <div className="form-row">
+              <div className="form-group">
+                <label>Role / Profession (Optional)</label>
+                <input type="text" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} />
+              </div>
+              <div className="form-group">
+                <label>Stage</label>
+                <select value={formData.stage} onChange={e => setFormData({...formData, stage: e.target.value})}>
+                  <option value="">Select Stage...</option>
+                  <option value="Awakening">Awakening</option>
+                  <option value="Dreaming">Dreaming</option>
+                  <option value="Phoenix Momentum">Phoenix Momentum</option>
+                </select>
+              </div>
+            </div>
+          </MobileFieldGroup>
+
+          <MobileFieldGroup title="Before">
+            <div className="form-group">
+              <label>Before (Where were you when you started?)</label>
+              <textarea required rows="3" value={formData.before} onChange={e => setFormData({...formData, before: e.target.value})}></textarea>
+            </div>
+          </MobileFieldGroup>
+
+          <MobileFieldGroup title="Shift">
+            <div className="form-group">
+              <label>The Shift (What changed during the work?)</label>
+              <textarea required rows="3" value={formData.shift} onChange={e => setFormData({...formData, shift: e.target.value})}></textarea>
+            </div>
+          </MobileFieldGroup>
+
+          <MobileFieldGroup title="After">
+            <div className="form-group">
+              <label>After (What are you doing now?)</label>
+              <textarea required rows="3" value={formData.after} onChange={e => setFormData({...formData, after: e.target.value})}></textarea>
+            </div>
+          </MobileFieldGroup>
+
+          <MobileFieldGroup title="Anonymous">
+            <div className="form-group">
+              <label>Display as Anonymous?</label>
+              <select value={formData.anonymous} onChange={e => setFormData({...formData, anonymous: e.target.value})}>
+                <option value="No">No, use my name</option>
+                <option value="Yes">Yes, keep it anonymous</option>
+              </select>
+            </div>
+          </MobileFieldGroup>
         </div>
-        <div className="form-group">
-          <label>The Shift (What changed during the work?)</label>
-          <textarea required rows="3" value={formData.shift} onChange={e => setFormData({...formData, shift: e.target.value})}></textarea>
-        </div>
-        <div className="form-group">
-          <label>After (What are you doing now?)</label>
-          <textarea required rows="3" value={formData.after} onChange={e => setFormData({...formData, after: e.target.value})}></textarea>
-        </div>
-        <div className="form-group">
-          <label>Display as Anonymous?</label>
-          <select value={formData.anonymous} onChange={e => setFormData({...formData, anonymous: e.target.value})}>
-            <option value="No">No, use my name</option>
-            <option value="Yes">Yes, keep it anonymous</option>
-          </select>
-        </div>
-        <button type="submit" className="btn btn-gold" style={{ width: '100%' }}>Submit Story</button>
+
+        <button type="submit" className="btn btn-gold" style={{ width: '100%', marginTop: 16 }}>Submit Story</button>
       </form>
+
     </div>
   );
 };

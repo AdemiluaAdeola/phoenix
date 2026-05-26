@@ -6,7 +6,10 @@
   justify-content: center;
   overflow-x: auto;
   scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x mandatory;
 }
+
 
 .assessment-tab-nav::-webkit-scrollbar {
   display: none;
@@ -16,6 +19,8 @@
   flex: 0 0 auto;
   min-width: 160px;
   padding: 15px 10px 14px;
+  scroll-snap-align: start;
+
   background: none;
   border: none;
   color: rgba(255,255,255,0.48);
@@ -224,6 +229,65 @@
 }
 
 @media (max-width: 560px) {
+  .desktop-only { display: none !important; }
+  .mobile-only { display: block !important; }
+
+  /* Mobile dropdown styling (keep same color palette) */
+  .mobile-field-group {
+    margin-bottom: 14px;
+  }
+
+  .mobile-field-toggle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    background: rgba(212,160,86,0.12);
+    border: 2px solid rgba(212,160,86,0.55);
+    border-radius: 12px;
+    padding: 14px 14px;
+    color: var(--gold);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .mobile-field-title {
+    font-size: 0.82rem;
+  }
+
+  .mobile-field-caret {
+    color: var(--gold);
+    transition: transform 0.2s ease;
+  }
+
+  .mobile-field-panel {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.25s ease;
+    background: var(--white);
+    border: 1px solid var(--ivory-dark);
+    border-radius: 12px;
+    margin-top: 10px;
+  }
+
+  .mobile-field-panel.open {
+    max-height: 800px;
+    padding: 12px;
+  }
+
+  .mobile-field-panel .form-row {
+    flex-direction: row;
+    gap: 12px;
+  }
+
+  .mobile-field-panel .form-group {
+    flex: 1;
+  }
+
   .scale-options {
     flex-direction: column;
     gap: 12px;
