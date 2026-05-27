@@ -501,69 +501,172 @@ const ClarityAssessment = ({ navigate }) => {
 const GenericAssessment = ({ title, type, questions }) => {
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '' });
   const [answers, setAnswers] = useState(Array(questions.length).fill(null));
+  const fieldPrefix = `${type}-client`;
 
   const calculateScore = () => {
     const total = answers.reduce((acc, val) => acc + (val || 0), 0);
     return Math.round((total / (questions.length * 5)) * 100);
   };
 
-  const handleSubmit = async () => {
-    if (answers.includes(null) || !formData.firstName) {
-      alert("Please complete all details and questions.");
+  const handleSubmit = async (e) => {
+    e?.preventDefault?.();
+
+    if (answers.includes(null)) {
+      alert("Please answer all questions before submitting.");
       return;
     }
+    if (!formData.firstName || !formData.lastName || !formData.email) {
+      alert("Please complete client details.");
+      return;
+    }
+    if (!/^\S+@\S+\.\S+$/.test(formData.email)) {
+      alert("Please enter a valid client email.");
+      return;
+    }
+
     const score = calculateScore();
-    const data = { ...formData, date: new Date().toISOString(), score };
+    const data = {
+      ...formData,
+      date: new Date().toISOString(),
+      answers,
+      score,
+    };
+
     if (type === 'readiness') await db.readiness.add(data);
     if (type === 'execution') await db.execution.add(data);
+
     alert('Assessment Submitted');
     setAnswers(Array(questions.length).fill(null));
+    setFormData({ firstName: '', lastName: '', email: '' });
   };
+
+  const inputStyle = { padding: '10px', border: '1px solid #ccc', borderRadius: '4px' };
 
   return (
     <>
-      <div className="card intake-card">
-        <h3>{title}</h3>
+      <form onSubmit={handleSubmit} noValidate>
+        <div className="card intake-card">
+          <h3>{title}</h3>
 
-        {/* Desktop */}
-        <div className="desktop-only">
-          <div className="form-row" style={{ marginTop: '16px' }}>
-            <input placeholder="Client First Name" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
-            <input placeholder="Client Last Name" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px' }} />
+          {/* Desktop */}
+          <div className="desktop-only">
+            <div className="form-row" style={{ marginTop: '16px' }}>
+              <div className="form-group" style={{ flex: 1 }}>
+                <label htmlFor={`${fieldPrefix}-first-name`}>Client First Name *</label>
+                <input
+                  id={`${fieldPrefix}-first-name`}
+                  type="text"
+                  placeholder="Client First Name"
+                  value={formData.firstName}
+                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  style={{ ...inputStyle, width: '100%' }}
+                />
+              </div>
+
+              <div className="form-group" style={{ flex: 1 }}>
+                <label htmlFor={`${fieldPrefix}-last-name`}>Client Last Name *</label>
+                <input
+                  id={`${fieldPrefix}-last-name`}
+                  type="text"
+                  placeholder="Client Last Name"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  style={{ ...inputStyle, width: '100%' }}
+                />
+              </div>
+            </div>
+
+            <div className="form-group" style={{ marginTop: 12 }}>
+              <label htmlFor={`${fieldPrefix}-email`}>Client Email *</label>
+              <input
+                id={`${fieldPrefix}-email`}
+                type="email"
+                placeholder="client@email.com"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                style={{ ...inputStyle, width: '100%' }}
+              />
+            </div>
+          </div>
+
+          {/* Mobile */}
+          <div className="mobile-only">
+            <MobileFieldGroup title="Client Details">
+              <div className="form-row">
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label htmlFor={`${fieldPrefix}-mobile-first-name`}>First Name *</label>
+                  <input
+                    id={`${fieldPrefix}-mobile-first-name`}
+                    type="text"
+                    placeholder="First Name"
+                    value={formData.firstName}
+                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    style={{ ...inputStyle, width: '100%' }}
+                  />
+                </div>
+                <div className="form-group" style={{ flex: 1 }}>
+                  <label htmlFor={`${fieldPrefix}-mobile-last-name`}>Last Name *</label>
+                  <input
+                    id={`${fieldPrefix}-mobile-last-name`}
+                    type="text"
+                    placeholder="Last Name"
+                    value={formData.lastName}
+                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                    style={{ ...inputStyle, width: '100%' }}
+                  />
+                </div>
+              </div>
+
+              <div className="form-group" style={{ marginTop: 12 }}>
+                <label htmlFor={`${fieldPrefix}-mobile-email`}>Email *</label>
+                <input
+                  id={`${fieldPrefix}-mobile-email`}
+                  type="email"
+                  placeholder="client@email.com"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  style={{ ...inputStyle, width: '100%' }}
+                />
+              </div>
+            </MobileFieldGroup>
           </div>
         </div>
 
-        {/* Mobile */}
-        <div className="mobile-only">
-          <MobileFieldGroup title="Client Name">
-            <div className="form-row">
-              <input placeholder="Client First Name" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px', width: '100%' }} />
-              <input placeholder="Client Last Name" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} style={{ padding: '10px', border: '1px solid #ccc', borderRadius: '4px', width: '100%' }} />
-            </div>
-          </MobileFieldGroup>
-        </div>
-      </div>
-      <div className="assessment-questions">
+        <div className="assessment-questions">
+          {questions.map((q, i) => (
+            <div key={i} className="card question-card">
+              <div className="q-number">Question {i + 1}</div>
+              <div className="q-text">{q}</div>
+              <div className="scale-options">
+                {[1, 2, 3, 4, 5].map((num) => (
+                  <button
+                    key={num}
+                    type="button"
+                    className={`scale-btn ${answers[i] === num ? 'selected' : ''}`}
+                    onClick={() => {
+                      const newAnswers = [...answers];
+                      newAnswers[i] = num;
+                      setAnswers(newAnswers);
+                    }}
+                    aria-label={`Select ${num} for Question ${i + 1}`}
+                  >
+                    <span className="scale-num">{num}</span>
+                  </button>
+                ))}
+              </div>
 
-        {questions.map((q, i) => (
-          <div key={i} className="card question-card">
-            <div className="q-number">Question {i + 1}</div>
-            <div className="q-text">{q}</div>
-            <div className="scale-options">
-              {[1, 2, 3, 4, 5].map(num => (
-                <button key={num} className={`scale-btn ${answers[i] === num ? 'selected' : ''}`} onClick={() => {
-                  const newAnswers = [...answers];
-                  newAnswers[i] = num;
-                  setAnswers(newAnswers);
-                }}>
-                  <span className="scale-num">{num}</span>
-                </button>
-              ))}
+              <div className="scale-ends">
+                <span>1</span>
+                <span>5</span>
+              </div>
             </div>
-          </div>
-        ))}
-        <button className="btn btn-primary" style={{ width: '100%' }} onClick={handleSubmit}>Submit {title}</button>
-      </div>
+          ))}
+
+          <button className="btn btn-primary" style={{ width: '100%' }} type="submit">
+            Submit {title}
+          </button>
+        </div>
+      </form>
     </>
   );
 };

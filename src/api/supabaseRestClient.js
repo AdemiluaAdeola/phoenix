@@ -1,15 +1,17 @@
 // Supports both Vite (browser) and plain Node (for smoke tests).
+const nodeEnv = globalThis.process?.env || {};
+
 const SUPABASE_URL =
   // Vite/browser
   (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_SUPABASE_URL) ||
   // Node/smoke test
-  process.env.SUPABASE_URL ||
+  nodeEnv.SUPABASE_URL ||
   // Fallback: REST host (preferred over dashboard URL)
   'https://kmrambclpujmnyxbfkjh.supabase.co';
 
 const SUPABASE_ANON_KEY =
   (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_SUPABASE_ANON_KEY) ||
-  process.env.SUPABASE_ANON_KEY ||
+  nodeEnv.SUPABASE_ANON_KEY ||
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttcmFtYmNscHVqbW55eGJma2poIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NzMyNjcsImV4cCI6MjA5NTE0OTI2N30.o9Yyoqbk9uPRVaHyg1lrCGEBNHOZyQzgzZZYQD7R8lA';
 
 

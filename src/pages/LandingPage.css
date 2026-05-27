@@ -4,14 +4,13 @@
   display: flex;
   overflow-x: auto;
   scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  scroll-snap-type: x mandatory;
 }
 
 
 .landing-tab-nav::-webkit-scrollbar {
   display: none;
 }
+
 
 .landing-tab-btn {
   flex: 0 0 auto;
