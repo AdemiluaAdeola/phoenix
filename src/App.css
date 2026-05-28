@@ -548,3 +548,52 @@ textarea {
     padding: 28px 18px 60px;
   }
 }
+
+/* ── SHARED UTILITIES (used across pages) ── */
+
+.hover-glow {
+  transition: box-shadow 0.25s ease, transform 0.25s ease;
+}
+
+.hover-glow:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 40px rgba(212,160,86,0.18);
+}
+
+.scale-on-hover {
+  transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.25s ease;
+}
+
+.scale-on-hover:hover {
+  transform: scale(1.03) translateY(-1px);
+  box-shadow: 0 10px 30px rgba(212,160,86,0.25);
+}
+
+/* Desktop/Mobile toggles used by multi-layout forms */
+.desktop-only {
+  display: block;
+}
+
+.mobile-only {
+  display: none;
+}
+
+@media (max-width: 560px) {
+  .desktop-only {
+    display: none !important;
+  }
+  .mobile-only {
+    display: block !important;
+  }
+}
+
+/* If some pages rely on global fade-slide animation, ensure it exists */
+@keyframes fadeSlide {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-slide {
+  animation: fadeSlide 0.3s ease;
+}
+

@@ -229,8 +229,16 @@
 }
 
 @media (max-width: 560px) {
+  /* Keep these for any other parts of the app that still use them */
   .desktop-only { display: none !important; }
   .mobile-only { display: block !important; }
+
+  /* Make unified forms stack naturally */
+  .unified-form .form-row {
+    flex-direction: column;
+    gap: 12px;
+  }
+
 
   /* Mobile dropdown styling (keep same color palette) */
   .mobile-field-group {

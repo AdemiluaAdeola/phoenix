@@ -346,113 +346,83 @@ const ClarityAssessment = ({ navigate }) => {
           <h3>Before We Begin</h3>
           <p>Tell us a little about yourself. This helps us personalize your results and ensures your clarity score is saved securely.</p>
 
-          <form onSubmit={handleIntakeSubmit}>
-            {/* Desktop */}
-            <div className="desktop-only">
-              <div className="form-row">
-                <div className="form-group">
-                  <label>First Name *</label>
-                  <input required type="text" placeholder="Your first name" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} />
-                </div>
-                <div className="form-group">
-                  <label>Last Name *</label>
-                  <input required type="text" placeholder="Your last name" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} />
-                </div>
-              </div>
+          <form onSubmit={handleIntakeSubmit} className="unified-form">
+            <div className="form-row">
               <div className="form-group">
-                <label>Email Address *</label>
-                <input required type="email" placeholder="your@email.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
+                <label>First Name *</label>
+                <input
+                  required
+                  type="text"
+                  placeholder="Your first name"
+                  value={formData.firstName}
+                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                />
               </div>
+
               <div className="form-group">
-                <label>How do you identify? (optional)</label>
-                <select value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})}>
-                  <option value="">Prefer not to say</option>
-                  <option>She/Her</option>
-                  <option>He/Him</option>
-                  <option>They/Them</option>
-                  <option>Other / Self-describe</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>How did you hear about Phoenix?</label>
-                <select value={formData.source} onChange={e => setFormData({...formData, source: e.target.value})}>
-                  <option value="">Select one...</option>
-                  <option>EPIC Live Stream</option>
-                  <option>Referral from friend or colleague</option>
-                  <option>Social media (TikTok, Instagram, LinkedIn)</option>
-                  <option>Website search</option>
-                  <option>Discovery call</option>
-                  <option>Other</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>What brings you here today? (optional)</label>
-                <textarea rows="3" placeholder="A few words about what's bringing you to this moment..." value={formData.context} onChange={e => setFormData({...formData, context: e.target.value})}></textarea>
+                <label>Last Name *</label>
+                <input
+                  required
+                  type="text"
+                  placeholder="Your last name"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                />
               </div>
             </div>
 
-            {/* Mobile */}
-            <div className="mobile-only">
-              <MobileFieldGroup title="First & Last Name">
-                <div className="form-row">
-                  <div className="form-group">
-                    <label>First Name *</label>
-                    <input required type="text" placeholder="Your first name" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} />
-                  </div>
-                  <div className="form-group">
-                    <label>Last Name *</label>
-                    <input required type="text" placeholder="Your last name" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} />
-                  </div>
-                </div>
-              </MobileFieldGroup>
-
-              <MobileFieldGroup title="Email Address">
-                <div className="form-group">
-                  <label>Email Address *</label>
-                  <input required type="email" placeholder="your@email.com" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-                </div>
-              </MobileFieldGroup>
-
-              <MobileFieldGroup title="Identify (optional)">
-                <div className="form-group">
-                  <label>How do you identify? (optional)</label>
-                  <select value={formData.gender} onChange={e => setFormData({...formData, gender: e.target.value})}>
-                    <option value="">Prefer not to say</option>
-                    <option>She/Her</option>
-                    <option>He/Him</option>
-                    <option>They/Them</option>
-                    <option>Other / Self-describe</option>
-                  </select>
-                </div>
-              </MobileFieldGroup>
-
-              <MobileFieldGroup title="Where you heard about Phoenix">
-                <div className="form-group">
-                  <label>How did you hear about Phoenix?</label>
-                  <select value={formData.source} onChange={e => setFormData({...formData, source: e.target.value})}>
-                    <option value="">Select one...</option>
-                    <option>EPIC Live Stream</option>
-                    <option>Referral from friend or colleague</option>
-                    <option>Social media (TikTok, Instagram, LinkedIn)</option>
-                    <option>Website search</option>
-                    <option>Discovery call</option>
-                    <option>Other</option>
-                  </select>
-                </div>
-              </MobileFieldGroup>
-
-              <MobileFieldGroup title="What brings you here? (optional)">
-                <div className="form-group">
-                  <label>What brings you here today? (optional)</label>
-                  <textarea rows="3" placeholder="A few words about what's bringing you to this moment..." value={formData.context} onChange={e => setFormData({...formData, context: e.target.value})}></textarea>
-                </div>
-              </MobileFieldGroup>
+            <div className="form-group">
+              <label>Email Address *</label>
+              <input
+                required
+                type="email"
+                placeholder="your@email.com"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+              />
             </div>
 
-            <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: 16 }}>Begin My Clarity Assessment →</button>
+            <div className="form-group">
+              <label>How do you identify? (optional)</label>
+              <select value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })}>
+                <option value="">Prefer not to say</option>
+                <option>She/Her</option>
+                <option>He/Him</option>
+                <option>They/Them</option>
+                <option>Other / Self-describe</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>How did you hear about Phoenix?</label>
+              <select value={formData.source} onChange={(e) => setFormData({ ...formData, source: e.target.value })}>
+                <option value="">Select one...</option>
+                <option>EPIC Live Stream</option>
+                <option>Referral from friend or colleague</option>
+                <option>Social media (TikTok, Instagram, LinkedIn)</option>
+                <option>Website search</option>
+                <option>Discovery call</option>
+                <option>Other</option>
+              </select>
+            </div>
+
+            <div className="form-group">
+              <label>What brings you here today? (optional)</label>
+              <textarea
+                rows="3"
+                placeholder="A few words about what's bringing you to this moment..."
+                value={formData.context}
+                onChange={(e) => setFormData({ ...formData, context: e.target.value })}
+              />
+            </div>
+
+            <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: 16 }}>
+              Begin My Clarity Assessment →
+            </button>
           </form>
         </div>
       )}
+
 
 
       {step === 2 && (
@@ -499,9 +469,16 @@ const ClarityAssessment = ({ navigate }) => {
 };
 
 const GenericAssessment = ({ title, type, questions }) => {
-  const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '' });
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    sessionType: 'clarity-intensive',
+    sessionDate: '',
+  });
   const [answers, setAnswers] = useState(Array(questions.length).fill(null));
   const fieldPrefix = `${type}-client`;
+  const isReadiness = type === 'readiness';
 
   const calculateScore = () => {
     const total = answers.reduce((acc, val) => acc + (val || 0), 0);
@@ -537,7 +514,13 @@ const GenericAssessment = ({ title, type, questions }) => {
 
     alert('Assessment Submitted');
     setAnswers(Array(questions.length).fill(null));
-    setFormData({ firstName: '', lastName: '', email: '' });
+    setFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      sessionType: 'clarity-intensive',
+      sessionDate: '',
+    });
   };
 
   const inputStyle = { padding: '10px', border: '1px solid #ccc', borderRadius: '4px' };
@@ -548,8 +531,7 @@ const GenericAssessment = ({ title, type, questions }) => {
         <div className="card intake-card">
           <h3>{title}</h3>
 
-          {/* Desktop */}
-          <div className="desktop-only">
+          <div className="unified-form unified-client-details">
             <div className="form-row" style={{ marginTop: '16px' }}>
               <div className="form-group" style={{ flex: 1 }}>
                 <label htmlFor={`${fieldPrefix}-first-name`}>Client First Name *</label>
@@ -587,48 +569,34 @@ const GenericAssessment = ({ title, type, questions }) => {
                 style={{ ...inputStyle, width: '100%' }}
               />
             </div>
-          </div>
 
-          {/* Mobile */}
-          <div className="mobile-only">
-            <MobileFieldGroup title="Client Details">
-              <div className="form-row">
-                <div className="form-group" style={{ flex: 1 }}>
-                  <label htmlFor={`${fieldPrefix}-mobile-first-name`}>First Name *</label>
+            {isReadiness && (
+              <>
+                <div className="form-group" style={{ marginTop: 12 }}>
+                  <label htmlFor={`${fieldPrefix}-session-type`}>Session Type</label>
+                  <select
+                    id={`${fieldPrefix}-session-type`}
+                    value={formData.sessionType}
+                    onChange={(e) => setFormData({ ...formData, sessionType: e.target.value })}
+                    style={{ ...inputStyle, width: '100%' }}
+                  >
+                    <option value="clarity-intensive">Clarity Intensive ($497) - screening use</option>
+                    <option value="week1">Week 1 of Program - deepening use</option>
+                  </select>
+                </div>
+
+                <div className="form-group" style={{ marginTop: 12 }}>
+                  <label htmlFor={`${fieldPrefix}-session-date`}>Session Date</label>
                   <input
-                    id={`${fieldPrefix}-mobile-first-name`}
-                    type="text"
-                    placeholder="First Name"
-                    value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                    id={`${fieldPrefix}-session-date`}
+                    type="date"
+                    value={formData.sessionDate}
+                    onChange={(e) => setFormData({ ...formData, sessionDate: e.target.value })}
                     style={{ ...inputStyle, width: '100%' }}
                   />
                 </div>
-                <div className="form-group" style={{ flex: 1 }}>
-                  <label htmlFor={`${fieldPrefix}-mobile-last-name`}>Last Name *</label>
-                  <input
-                    id={`${fieldPrefix}-mobile-last-name`}
-                    type="text"
-                    placeholder="Last Name"
-                    value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    style={{ ...inputStyle, width: '100%' }}
-                  />
-                </div>
-              </div>
-
-              <div className="form-group" style={{ marginTop: 12 }}>
-                <label htmlFor={`${fieldPrefix}-mobile-email`}>Email *</label>
-                <input
-                  id={`${fieldPrefix}-mobile-email`}
-                  type="email"
-                  placeholder="client@email.com"
-                  value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  style={{ ...inputStyle, width: '100%' }}
-                />
-              </div>
-            </MobileFieldGroup>
+              </>
+            )}
           </div>
         </div>
 
@@ -689,8 +657,7 @@ const TestimonialForm = ({ navigate }) => {
       <h3>Share Your Story</h3>
       <p style={{ marginBottom: '20px', color: 'var(--muted)' }}>We want to hear about your transformation.</p>
       <form onSubmit={handleSubmit}>
-        {/* Desktop */}
-        <div className="desktop-only">
+        <div className="unified-form unified-testimonial-details">
           <div className="form-row">
             <div className="form-group">
               <label>First Name</label>
@@ -701,10 +668,12 @@ const TestimonialForm = ({ navigate }) => {
               <input required type="text" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} />
             </div>
           </div>
+
           <div className="form-group">
             <label>Email (For follow-up, won't be displayed)</label>
             <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
           </div>
+
           <div className="form-row">
             <div className="form-group">
               <label>Role / Profession (Optional)</label>
@@ -720,18 +689,22 @@ const TestimonialForm = ({ navigate }) => {
               </select>
             </div>
           </div>
+
           <div className="form-group">
             <label>Before (Where were you when you started?)</label>
             <textarea required rows="3" value={formData.before} onChange={e => setFormData({...formData, before: e.target.value})}></textarea>
           </div>
+
           <div className="form-group">
             <label>The Shift (What changed during the work?)</label>
             <textarea required rows="3" value={formData.shift} onChange={e => setFormData({...formData, shift: e.target.value})}></textarea>
           </div>
+
           <div className="form-group">
             <label>After (What are you doing now?)</label>
             <textarea required rows="3" value={formData.after} onChange={e => setFormData({...formData, after: e.target.value})}></textarea>
           </div>
+
           <div className="form-group">
             <label>Display as Anonymous?</label>
             <select value={formData.anonymous} onChange={e => setFormData({...formData, anonymous: e.target.value})}>
@@ -741,77 +714,6 @@ const TestimonialForm = ({ navigate }) => {
           </div>
         </div>
 
-        {/* Mobile */}
-        <div className="mobile-only">
-          <MobileFieldGroup title="Name">
-            <div className="form-row">
-              <div className="form-group">
-                <label>First Name</label>
-                <input required type="text" value={formData.firstName} onChange={e => setFormData({...formData, firstName: e.target.value})} />
-              </div>
-              <div className="form-group">
-                <label>Last Name</label>
-                <input required type="text" value={formData.lastName} onChange={e => setFormData({...formData, lastName: e.target.value})} />
-              </div>
-            </div>
-          </MobileFieldGroup>
-
-          <MobileFieldGroup title="Email">
-            <div className="form-group">
-              <label>Email (For follow-up, won't be displayed)</label>
-              <input required type="email" value={formData.email} onChange={e => setFormData({...formData, email: e.target.value})} />
-            </div>
-          </MobileFieldGroup>
-
-          <MobileFieldGroup title="Role & Stage">
-            <div className="form-row">
-              <div className="form-group">
-                <label>Role / Profession (Optional)</label>
-                <input type="text" value={formData.role} onChange={e => setFormData({...formData, role: e.target.value})} />
-              </div>
-              <div className="form-group">
-                <label>Stage</label>
-                <select value={formData.stage} onChange={e => setFormData({...formData, stage: e.target.value})}>
-                  <option value="">Select Stage...</option>
-                  <option value="Awakening">Awakening</option>
-                  <option value="Dreaming">Dreaming</option>
-                  <option value="Phoenix Momentum">Phoenix Momentum</option>
-                </select>
-              </div>
-            </div>
-          </MobileFieldGroup>
-
-          <MobileFieldGroup title="Before">
-            <div className="form-group">
-              <label>Before (Where were you when you started?)</label>
-              <textarea required rows="3" value={formData.before} onChange={e => setFormData({...formData, before: e.target.value})}></textarea>
-            </div>
-          </MobileFieldGroup>
-
-          <MobileFieldGroup title="Shift">
-            <div className="form-group">
-              <label>The Shift (What changed during the work?)</label>
-              <textarea required rows="3" value={formData.shift} onChange={e => setFormData({...formData, shift: e.target.value})}></textarea>
-            </div>
-          </MobileFieldGroup>
-
-          <MobileFieldGroup title="After">
-            <div className="form-group">
-              <label>After (What are you doing now?)</label>
-              <textarea required rows="3" value={formData.after} onChange={e => setFormData({...formData, after: e.target.value})}></textarea>
-            </div>
-          </MobileFieldGroup>
-
-          <MobileFieldGroup title="Anonymous">
-            <div className="form-group">
-              <label>Display as Anonymous?</label>
-              <select value={formData.anonymous} onChange={e => setFormData({...formData, anonymous: e.target.value})}>
-                <option value="No">No, use my name</option>
-                <option value="Yes">Yes, keep it anonymous</option>
-              </select>
-            </div>
-          </MobileFieldGroup>
-        </div>
 
         <button type="submit" className="btn btn-gold" style={{ width: '100%', marginTop: 16 }}>Submit Story</button>
       </form>
