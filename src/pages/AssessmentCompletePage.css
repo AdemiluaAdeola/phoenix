@@ -553,6 +553,30 @@
   color: var(--white);
 }
 
+.email-status-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  flex-shrink: 0;
+}
+
+.email-preview-trigger-btn.resend {
+  background: transparent;
+  color: var(--gold);
+  border: 1px solid var(--gold);
+}
+
+.email-preview-trigger-btn.resend:hover {
+  background: var(--gold);
+  color: var(--navy);
+}
+
+.email-preview-trigger-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
 
 /* ── INTERACTIVE EMAIL VIEW INSTANT MODAL ── */
 

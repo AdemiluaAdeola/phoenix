@@ -10,6 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@emailjs/browser": "^4.4.1",
     "dexie": "^4.4.2",
     "file-saver": "^2.0.5",
     "react": "^19.2.6",

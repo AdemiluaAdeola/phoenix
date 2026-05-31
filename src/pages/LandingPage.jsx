@@ -31,18 +31,18 @@ const platformCards = [
 const LandingPage = () => {
   return (
     <div className="landing-page animate-fade-slide">
-      <nav className="landing-tab-nav" aria-label="Assessment platform navigation">
-        <Link className="landing-tab-btn active" to="/assessment">
-          Clarity Assessment <span className="landing-tab-badge">Free</span>
+      <nav className="tab-nav" aria-label="Assessment platform navigation">
+        <Link className="tab-btn active" to="/assessment">
+          Clarity assessment <span className="tab-badge">Free</span>
         </Link>
-        <Link className="landing-tab-btn" to="/assessment?mode=coach">
-          Readiness Assessment <span className="landing-tab-badge">Coach</span>
+        <Link className="tab-btn" to="/assessment?mode=coach">
+          readiness assessment <span className="tab-badge">Coach</span>
         </Link>
-        <Link className="landing-tab-btn" to="/assessment?mode=coach">
-          Execution Assessment <span className="landing-tab-badge">Week 3</span>
+        <Link className="tab-btn" to="/assessment?mode=coach">
+          execution assessment <span className="tab-badge">Week 3</span>
         </Link>
-        <Link className="landing-tab-btn" to="/client-stories">
-          Client Stories
+        <Link className="tab-btn" to="/assessment?share=story">
+          testimonials
         </Link>
       </nav>
 

@@ -225,15 +225,35 @@ const AssessmentPage = () => {
 
   return (
     <div className="animate-fade-slide">
-      <div className="assessment-tab-nav">
-        <button className={`assessment-tab-btn ${activeTab === 'clarity' ? 'active' : ''}`} onClick={() => setActiveTab('clarity')}>Clarity Assessment</button>
+      <div className="tab-nav">
+        <button 
+          className={`tab-btn ${activeTab === 'clarity' ? 'active' : ''}`} 
+          onClick={() => setActiveTab('clarity')}
+        >
+          Clarity assessment <span className="tab-badge">Free</span>
+        </button>
         {(isUnlocked || share === 'story') && (
-          <button className={`assessment-tab-btn ${activeTab === 'testimonial' ? 'active' : ''}`} onClick={() => setActiveTab('testimonial')}>Share Your Story</button>
+          <button 
+            className={`tab-btn ${activeTab === 'testimonial' ? 'active' : ''}`} 
+            onClick={() => setActiveTab('testimonial')}
+          >
+            testimonials
+          </button>
         )}
         {isUnlocked && (
           <>
-            <button className={`assessment-tab-btn ${activeTab === 'readiness' ? 'active' : ''}`} onClick={() => setActiveTab('readiness')}>Readiness (Coach)</button>
-            <button className={`assessment-tab-btn ${activeTab === 'execution' ? 'active' : ''}`} onClick={() => setActiveTab('execution')}>Execution (Coach)</button>
+            <button 
+              className={`tab-btn ${activeTab === 'readiness' ? 'active' : ''}`} 
+              onClick={() => setActiveTab('readiness')}
+            >
+              readiness assessment <span className="tab-badge">Coach</span>
+            </button>
+            <button 
+              className={`tab-btn ${activeTab === 'execution' ? 'active' : ''}`} 
+              onClick={() => setActiveTab('execution')}
+            >
+              execution assessment <span className="tab-badge">Week 3</span>
+            </button>
           </>
         )}
       </div>
@@ -521,11 +541,7 @@ const GenericAssessment = ({ title, type, questions }) => {
       sessionType: 'clarity-intensive',
       sessionDate: '',
     });
-  };
-
-  const inputStyle = { padding: '10px', border: '1px solid #ccc', borderRadius: '4px' };
-
-  return (
+  };  return (
     <>
       <form onSubmit={handleSubmit} noValidate>
         <div className="card intake-card">
@@ -541,7 +557,6 @@ const GenericAssessment = ({ title, type, questions }) => {
                   placeholder="Client First Name"
                   value={formData.firstName}
                   onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  style={{ ...inputStyle, width: '100%' }}
                 />
               </div>
 
@@ -553,7 +568,6 @@ const GenericAssessment = ({ title, type, questions }) => {
                   placeholder="Client Last Name"
                   value={formData.lastName}
                   onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  style={{ ...inputStyle, width: '100%' }}
                 />
               </div>
             </div>
@@ -566,7 +580,6 @@ const GenericAssessment = ({ title, type, questions }) => {
                 placeholder="client@email.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                style={{ ...inputStyle, width: '100%' }}
               />
             </div>
 
@@ -578,7 +591,6 @@ const GenericAssessment = ({ title, type, questions }) => {
                     id={`${fieldPrefix}-session-type`}
                     value={formData.sessionType}
                     onChange={(e) => setFormData({ ...formData, sessionType: e.target.value })}
-                    style={{ ...inputStyle, width: '100%' }}
                   >
                     <option value="clarity-intensive">Clarity Intensive ($497) - screening use</option>
                     <option value="week1">Week 1 of Program - deepening use</option>
@@ -592,7 +604,6 @@ const GenericAssessment = ({ title, type, questions }) => {
                     type="date"
                     value={formData.sessionDate}
                     onChange={(e) => setFormData({ ...formData, sessionDate: e.target.value })}
-                    style={{ ...inputStyle, width: '100%' }}
                   />
                 </div>
               </>

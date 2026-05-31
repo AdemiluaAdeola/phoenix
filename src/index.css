@@ -254,3 +254,103 @@ h1 {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* ── UNIFORM TAB NAV & BUTTONS (FORM LINKS) ── */
+.tab-nav {
+  background: var(--navy);
+  border-top: 1px solid rgba(212,160,86,0.2);
+  display: flex;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tab-nav::-webkit-scrollbar {
+  display: none;
+}
+
+.tab-btn {
+  flex: 1;
+  min-width: 160px;
+  padding: 16px 20px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.45);
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.82rem;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  transition: all 0.25s;
+  white-space: nowrap;
+  text-align: center;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.tab-btn:hover {
+  color: var(--gold-light);
+}
+
+.tab-btn.active {
+  color: var(--gold);
+  border-bottom-color: var(--gold);
+  background: rgba(212,160,86,0.06);
+}
+
+.tab-badge {
+  display: inline-block;
+  background: rgba(212,160,86,0.2);
+  color: var(--gold);
+  border-radius: 20px;
+  padding: 1px 8px;
+  font-size: 0.7rem;
+  margin-left: 6px;
+}
+
+/* ── FORM LINKS / TAB NAV — MOBILE ── */
+@media (max-width: 680px) {
+  .tab-nav {
+    flex-direction: column;
+    overflow-x: visible;
+  }
+
+  .tab-btn {
+    min-width: unset;
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 0.75rem;
+    border-bottom: none;
+    border-left: 3px solid transparent;
+    text-align: left;
+    justify-content: flex-start;
+  }
+
+  .tab-btn.active {
+    border-left-color: var(--gold);
+    border-bottom-color: transparent;
+  }
+
+  .tab-badge {
+    padding: 1px 6px;
+    font-size: 0.65rem;
+  }
+}
+
+@media (max-width: 420px) {
+  .tab-btn {
+    padding: 10px 14px;
+    font-size: 0.7rem;
+    letter-spacing: 0.04em;
+    gap: 4px;
+  }
+
+  .tab-badge {
+    font-size: 0.6rem;
+    padding: 1px 5px;
+  }
+}
+

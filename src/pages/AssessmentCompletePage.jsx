@@ -1,6 +1,6 @@
 import { useLocation, Link } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { sendAssessmentEmail } from '../utils/emailService';
+import { useState, useEffect, useMemo } from 'react';
+import { sendAssessmentEmail, buildEmailHTML } from '../utils/emailService';
 import './AssessmentCompletePage.css';
 
 const dimFullNames = ['Strengths & Skills', 'Values & What Matters', 'Patterns & Blocks', 'Direction & Opportunity', 'Alignment & Confidence'];
@@ -89,35 +89,49 @@ const AssessmentCompletePage = () => {
     return () => clearTimeout(timer);
   }, []);
 
-  // 3. Simulated Outbound Email sending
+  // 3. Outbound Email sending
   const [emailStatus, setEmailStatus] = useState('sending'); // 'sending' | 'success' | 'error'
   const [showEmailPreview, setShowEmailPreview] = useState(false);
+  const [resending, setResending] = useState(false);
 
-  useEffect(() => {
-    if (!data) {
-      return undefined;
+  // Pre-build the email HTML once for the preview iframe
+  const emailPreviewHTML = useMemo(() => (data ? buildEmailHTML(data) : ''), [data]);
+
+  const triggerEmailSend = async () => {
+    if (!data) return;
+    try {
+      setEmailStatus('sending');
+      await sendAssessmentEmail(data);
+      setEmailStatus('success');
+    } catch (err) {
+      console.error(err);
+      setEmailStatus('error');
     }
+  };
 
+  // Send on first mount
+  useEffect(() => {
+    if (!data) return undefined;
     let active = true;
     const send = async () => {
       try {
         setEmailStatus('sending');
         await sendAssessmentEmail(data);
-        if (active) {
-          setEmailStatus('success');
-        }
+        if (active) setEmailStatus('success');
       } catch (err) {
         console.error(err);
-        if (active) {
-          setEmailStatus('error');
-        }
+        if (active) setEmailStatus('error');
       }
     };
     send();
-    return () => {
-      active = false;
-    };
+    return () => { active = false; };
   }, [data]);
+
+  const handleResend = async () => {
+    setResending(true);
+    await triggerEmailSend();
+    setResending(false);
+  };
 
   if (!data) {
     return (
@@ -163,9 +177,18 @@ const AssessmentCompletePage = () => {
                 <strong>Assessment Results Delivered!</strong>
                 <span>A high-fidelity breakdown has been successfully dispatched to <strong>{data.email}</strong>.</span>
               </div>
-              <button className="email-preview-trigger-btn" onClick={() => setShowEmailPreview(true)}>
-                🔍 Open Email Report Preview
-              </button>
+              <div className="email-status-actions">
+                <button className="email-preview-trigger-btn" onClick={() => setShowEmailPreview(true)}>
+                  🔍 Open Email Report Preview
+                </button>
+                <button
+                  className="email-preview-trigger-btn resend"
+                  onClick={handleResend}
+                  disabled={resending}
+                >
+                  {resending ? '↻ Sending…' : '↻ Resend Email'}
+                </button>
+              </div>
             </div>
           )}
           {emailStatus === 'error' && (
@@ -175,9 +198,18 @@ const AssessmentCompletePage = () => {
                 <strong>Email Delivery Offline</strong>
                 <span>Unable to establish mail servers, but your results have been locally archived.</span>
               </div>
-              <button className="email-preview-trigger-btn error" onClick={() => setShowEmailPreview(true)}>
-                🔍 Preview Report
-              </button>
+              <div className="email-status-actions">
+                <button className="email-preview-trigger-btn error" onClick={() => setShowEmailPreview(true)}>
+                  🔍 Preview Report
+                </button>
+                <button
+                  className="email-preview-trigger-btn resend"
+                  onClick={handleResend}
+                  disabled={resending}
+                >
+                  {resending ? '↻ Retrying…' : '↻ Retry Send'}
+                </button>
+              </div>
             </div>
           )}
         </div>
@@ -267,7 +299,7 @@ const AssessmentCompletePage = () => {
         </button>
       </div>
 
-      {/* high-fidelity custom-styled email client preview modal */}
+      {/* High-fidelity email client preview modal — renders the exact HTML that is emailed */}
       {showEmailPreview && (
         <div className="email-modal-overlay" onClick={() => setShowEmailPreview(false)}>
           <div className="email-modal-container animate-bounce-in" onClick={e => e.stopPropagation()}>
@@ -287,86 +319,12 @@ const AssessmentCompletePage = () => {
               <div><strong>Date:</strong> {new Date(data.date).toLocaleString()}</div>
             </div>
             <div className="email-modal-body">
-              <div style={{ backgroundColor: '#F7F4EF', padding: '30px 15px', fontFamily: "'DM Sans', sans-serif", color: '#1C1C1C' }}>
-                <div style={{ maxWidth: '600px', margin: '0 auto', backgroundColor: '#FFFFFF', borderRadius: '12px', overflow: 'hidden', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #EDE8DF' }}>
-                  
-                  {/* Banner */}
-                  <div style={{ backgroundColor: '#0D1028', padding: '36px 32px', textAlign: 'center', borderBottom: '3px solid #D4A056' }}>
-                    <div style={{ color: '#D4A056', fontSize: '0.75rem', fontWeight: '850', letterSpacing: '0.18em', textTransform: 'uppercase', marginBottom: '8px' }}>Phoenix Clear Insight</div>
-                    <h1 style={{ color: '#FFFFFF', fontFamily: "'Playfair Display', serif", fontSize: '2rem', margin: 0, fontWeight: '700', letterSpacing: '0.01em' }}>Your Clarity Report</h1>
-                  </div>
-
-                  {/* Body Text */}
-                  <div style={{ padding: '32px' }}>
-                    <p style={{ fontSize: '1.05rem', color: '#0D1028', fontWeight: '600', margin: '0 0 16px 0' }}>Dear {data.firstName},</p>
-                    <p style={{ fontSize: '0.94rem', color: '#6B6B7B', lineHeight: '1.65', margin: '0 0 24px 0' }}>
-                      Thank you for completing the Phoenix Clarity Assessment. This report summarizes your visual progress across our 5 clarity dimensions and holds a mirror to what your next developmental chapter requires.
-                    </p>
-
-                    {/* Overall Score */}
-                    <div style={{ backgroundColor: '#F7F4EF', borderRadius: '8px', padding: '24px', textAlign: 'center', marginBottom: '28px', border: '1px solid #EDE8DF' }}>
-                      <div style={{ fontSize: '0.72rem', fontWeight: '800', color: '#6B6B7B', letterSpacing: '0.12em', textTransform: 'uppercase', marginBottom: '8px' }}>YOUR CLARITY SCORE</div>
-                      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '6px', marginBottom: '12px' }}>
-                        <span style={{ fontSize: '4.5rem', fontFamily: "'Playfair Display', serif", color: '#0D1028', fontWeight: 'bold', lineHeight: 1 }}>{data.score}</span>
-                        <span style={{ fontSize: '1.1rem', color: '#6B6B7B' }}>/ 100</span>
-                      </div>
-                      <div style={{ display: 'inline-block', backgroundColor: '#0D1028', color: '#D4A056', fontSize: '0.92rem', fontWeight: '700', padding: '8px 24px', borderRadius: '30px', letterSpacing: '0.02em' }}>
-                        {archetype.name}
-                      </div>
-                    </div>
-
-                    {/* Breakdown */}
-                    <h3 style={{ fontFamily: "'Playfair Display', serif", color: '#0D1028', fontSize: '1.25rem', margin: '0 0 16px 0', borderBottom: '1.5px solid #EDE8DF', paddingBottom: '8px', fontWeight: 'bold' }}>The Five Dimensions Breakdown</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '32px' }}>
-                      {dimScores.map((scoreVal, idx) => {
-                        const pct = Math.round((scoreVal / 25) * 100);
-                        const scaledOf20 = Math.round((scoreVal / 25) * 20);
-                        const statusText = pct >= 72 ? 'Active' : pct >= 52 ? 'Developing' : 'Emerging';
-                        const statusBg = pct >= 72 ? '#EAF4EF' : pct >= 52 ? '#FBF8E8' : '#FAECEE';
-                        const statusColor = pct >= 72 ? '#2D6A4F' : pct >= 52 ? '#B08A00' : '#8B2635';
-                        
-                        return (
-                          <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', backgroundColor: '#FDFCFB', borderRadius: '8px', border: '1px solid #EDE8DF' }}>
-                            <div>
-                              <span style={{ fontWeight: 'bold', color: '#0D1028', fontSize: '0.9rem', display: 'block' }}>{dimLabels[idx]}</span>
-                              <span style={{ color: '#D4A056', fontSize: '0.72rem', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.04em' }}>{dimPhases[idx]}</span>
-                            </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                              <span style={{ backgroundColor: statusBg, color: statusColor, fontSize: '0.68rem', fontWeight: 'bold', padding: '4px 10px', borderRadius: '20px', textTransform: 'uppercase', letterSpacing: '0.02em' }}>{statusText}</span>
-                              <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 'bold', color: '#0D1028', fontSize: '1.1rem' }}>{scaledOf20}/20</span>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-
-                    {/* Veta's Read */}
-                    <h3 style={{ fontFamily: "'Playfair Display', serif", color: '#0D1028', fontSize: '1.25rem', margin: '0 0 12px 0', borderBottom: '1.5px solid #EDE8DF', paddingBottom: '8px', fontWeight: 'bold' }}>My Direct Read of Your Scores</h3>
-                    <div style={{ fontSize: '0.94rem', color: '#1C1C1C', fontStyle: 'italic', backgroundColor: '#FDFDFD', borderLeft: '4px solid #D4A056', padding: '20px', lineHeight: '1.75', margin: '0 0 32px 0', borderRadius: '0 8px 8px 0', boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.02)' }}>
-                      "{archetype.directRead}"
-                    </div>
-
-                    {/* Next Steps CTA */}
-                    <div style={{ backgroundColor: '#0D1028', borderRadius: '10px', padding: '32px 24px', textAlign: 'center', color: '#FFFFFF' }}>
-                      <h4 style={{ color: '#FFFFFF', fontFamily: "'Playfair Display', serif", fontSize: '1.3rem', margin: '0 0 12px 0', fontWeight: 'bold' }}>The Next Step: A 90-Minute Clarity Intensive</h4>
-                      <p style={{ color: 'rgba(255,255,255,0.7)', fontSize: '0.88rem', lineHeight: '1.65', margin: '0 0 24px 0' }}>
-                        We take what the assessment surfaced and turn it into a specific, actionable direction—in a single powerful session.
-                      </p>
-                      <a href="https://www.phoenixclearinsight.com/book" style={{ display: 'inline-block', backgroundColor: '#D4A056', color: '#0D1028', fontWeight: '800', padding: '14px 28px', borderRadius: '6px', textDecoration: 'none', fontSize: '0.9rem', letterSpacing: '0.02em', boxShadow: '0 4px 10px rgba(212,160,86,0.3)' }}>
-                        Book Your Clarity Session ($497) →
-                      </a>
-                    </div>
-
-                  </div>
-
-                  {/* Footer */}
-                  <div style={{ backgroundColor: '#EDE8DF', padding: '28px', textAlign: 'center', fontSize: '0.8rem', color: '#6B6B7B', borderTop: '1px solid #EDE8DF' }}>
-                    <p style={{ margin: '0 0 6px 0', fontWeight: 'bold', color: '#0D1028', letterSpacing: '0.04em' }}>✦ VETA P. HURST, ESQ., ICF-ACC</p>
-                    <p style={{ margin: 0 }}>Founder &amp; Principal Coach, Phoenix Clear Insight</p>
-                  </div>
-
-                </div>
-              </div>
+              {/* Render the exact same HTML that gets emailed — pixel-perfect preview */}
+              <iframe
+                title="Email Preview"
+                srcDoc={emailPreviewHTML}
+                style={{ width: '100%', minHeight: '720px', border: 'none', background: '#F7F4EF' }}
+              />
             </div>
           </div>
         </div>

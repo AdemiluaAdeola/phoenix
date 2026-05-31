@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import './BlogPage.css';
 
 const BlogPage = () => {
@@ -201,9 +202,9 @@ const BlogPage = () => {
           <div className="post-cta">
             <h3>Ready to Start With Clarity?</h3>
             <p>If something in these three posts resonated — if you recognized yourself somewhere in these pages — the next step is simple.</p>
-            <a href="/assessment" className="btn btn-gold">Take the Free Clarity Assessment →</a>
+            <Link to="/assessment" className="btn btn-gold">Take the Free Clarity Assessment →</Link>
             <span className="secondary" style={{ display: 'block', marginTop: '14px', color: 'rgba(255,255,255,0.4)', fontSize: '0.82rem', fontStyle: 'italic' }}>
-              15 minutes. Free. Shows you exactly where you are.<br />Or <a href="https://www.phoenixclearinsight.com/discovery" style={{ color: 'var(--gold)', textDecoration: 'underline' }}>schedule a free 15-minute call</a> if you'd rather talk first.
+              15 minutes. Free. Shows you exactly where you are.<br />Or <a href="https://www.phoenixclearinsight.com/discovery" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--gold)', textDecoration: 'underline' }}>schedule a free 15-minute call</a> if you'd rather talk first.
             </span>
           </div>
         </div>
