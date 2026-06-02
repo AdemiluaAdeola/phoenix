@@ -55,49 +55,124 @@ async function supabaseFetch(path, { method = 'GET', headers = {}, body } = {}) 
  * - Schema assumption based on existing Dexie:
  *   firstName, lastName, email, identity, source, context, responses (json), score, archetype (optional), createdAt (timestamp)
  */
+// ── MAPPING HELPERS ──
+
+const archetypeNames = {
+  phoenix_momentum: 'Phoenix Momentum',
+  dreaming: 'Dreaming',
+  awakening: 'Awakening',
+};
+
+export function mapAssessment(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    email: row.email,
+    identity: row.identity,
+    source: row.source,
+    context: row.context,
+    responses: row.responses,
+    score: row.score,
+    archetype: row.archetype,
+    archetypeName: archetypeNames[row.archetype] || row.archetype || '',
+    dimScores: Array.isArray(row.dim_scores) ? row.dim_scores : [],
+    date: row.created_at
+  }
+}
+
+export function mapTestimonial(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    anonymous: row.anonymous,
+    role: row.role,
+    stage: row.stage,
+    before: row.before,
+    shift: row.shift,
+    after: row.after,
+    status: row.status,
+    date: row.created_at
+  }
+}
+
+export function mapReadiness(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    email: row.email,
+    score: row.score,
+    responses: row.responses,
+    sessionType: row.session_type,
+    sessionDate: row.session_date,
+    date: row.created_at
+  }
+}
+
+export function mapExecutionForm(row) {
+  if (!row) return null;
+  return {
+    id: row.id,
+    firstName: row.first_name,
+    lastName: row.last_name,
+    email: row.email,
+    answers: row.responses,
+    status: row.status,
+    notes: row.notes,
+    date: row.created_at
+  }
+}
+
+/**
+ * assessments table
+ */
 export async function createAssessment(payload) {
-  // POST /rest/v1/<table>
   const row = {
     first_name: payload.firstName,
     last_name: payload.lastName,
-
     email: payload.email,
     identity: payload.identity ?? null,
     source: payload.source ?? null,
     context: payload.context ?? null,
-    responses: payload.responses ?? [],
+    responses: payload.answers ?? payload.responses ?? [],
     score: Number(payload.score ?? 0),
     archetype: payload.archetype ?? null,
-    // DB column is created_at (snake_case). Let DB default if not provided.
-    created_at: payload.createdAt ?? new Date().toISOString()
-
+    dim_scores: Array.isArray(payload.dimScores) ? payload.dimScores : null,
+    created_at: payload.date ?? new Date().toISOString()
   }
 
-  return supabaseFetch(`/rest/v1/assessments?select=*`, {
+  const res = await supabaseFetch(`/rest/v1/assessments?select=*`, {
     method: 'POST',
     headers: {
       Prefer: 'return=representation'
     },
     body: row
   })
+  const records = Array.isArray(res) ? res : [res];
+  return mapAssessment(records[0]);
 }
 
 export async function listAssessments() {
-  return supabaseFetch(
+  const res = await supabaseFetch(
     `/rest/v1/assessments?select=*&order=created_at.desc`
   )
+  return (res || []).map(mapAssessment)
 }
 
 /**
  * testimonials table
- * - Schema assumption:
- *   firstName, lastName, anonymous, role, stage, before, shift, after, status, createdAt
  */
 export async function listTestimonials({ status } = {}) {
   const query = status
     ? `/rest/v1/testimonials?select=*&status=eq.${encodeURIComponent(status)}&order=created_at.desc`
     : `/rest/v1/testimonials?select=*&order=created_at.desc`
-  return supabaseFetch(query)
+  const res = await supabaseFetch(query)
+  return (res || []).map(mapTestimonial)
 }
 
 export async function updateTestimonialStatus(id, status) {
@@ -108,8 +183,6 @@ export async function updateTestimonialStatus(id, status) {
     throw new Error('Invalid status')
   }
 
-  // PATCH /rest/v1/<table>?id=eq.<id>
-  // Update by primary key column "id" (assumed).
   const rows = await supabaseFetch(
     `/rest/v1/testimonials?id=eq.${encodeURIComponent(id)}&select=*`,
     {
@@ -121,6 +194,93 @@ export async function updateTestimonialStatus(id, status) {
     }
   )
 
-  // Supabase returns array of updated rows.
-  return Array.isArray(rows) ? rows[0] : rows
+  const updatedRow = Array.isArray(rows) ? rows[0] : rows;
+  return mapTestimonial(updatedRow);
 }
+
+export async function createTestimonial(payload) {
+  const row = {
+    first_name: payload.firstName ?? null,
+    last_name: payload.lastName ?? null,
+    anonymous: payload.anonymous ? String(payload.anonymous) : 'No',
+    role: payload.role ?? null,
+    stage: payload.stage ?? null,
+    before: payload.before ?? null,
+    shift: payload.shift ?? null,
+    after: payload.after ?? null,
+    status: payload.status ?? 'Pending Review',
+    created_at: payload.date ?? new Date().toISOString()
+  }
+
+  const res = await supabaseFetch(`/rest/v1/testimonials?select=*`, {
+    method: 'POST',
+    headers: {
+      Prefer: 'return=representation'
+    },
+    body: row
+  })
+  const records = Array.isArray(res) ? res : [res];
+  return mapTestimonial(records[0]);
+}
+
+/**
+ * readiness table
+ */
+export async function createReadiness(payload) {
+  const row = {
+    first_name: payload.firstName,
+    last_name: payload.lastName,
+    email: payload.email,
+    score: Number(payload.score ?? 0),
+    responses: payload.answers ?? payload.responses ?? [],
+    session_type: payload.sessionType ?? null,
+    session_date: payload.sessionDate ?? null,
+    created_at: payload.date ?? new Date().toISOString()
+  }
+
+  const res = await supabaseFetch(`/rest/v1/readiness?select=*`, {
+    method: 'POST',
+    headers: {
+      Prefer: 'return=representation'
+    },
+    body: row
+  })
+  const records = Array.isArray(res) ? res : [res];
+  return mapReadiness(records[0]);
+}
+
+export async function listReadiness() {
+  const res = await supabaseFetch(`/rest/v1/readiness?select=*&order=created_at.desc`)
+  return (res || []).map(mapReadiness)
+}
+
+/**
+ * execution_forms table
+ */
+export async function createExecutionForm(payload) {
+  const row = {
+    first_name: payload.firstName,
+    last_name: payload.lastName,
+    email: payload.email,
+    responses: payload.answers ?? [],
+    status: payload.status ?? 'Pending',
+    notes: payload.notes ?? null,
+    created_at: payload.date ?? new Date().toISOString()
+  }
+
+  const res = await supabaseFetch(`/rest/v1/execution_forms?select=*`, {
+    method: 'POST',
+    headers: {
+      Prefer: 'return=representation'
+    },
+    body: row
+  })
+  const records = Array.isArray(res) ? res : [res];
+  return mapExecutionForm(records[0]);
+}
+
+export async function listExecutionForms() {
+  const res = await supabaseFetch(`/rest/v1/execution_forms?select=*&order=created_at.desc`)
+  return (res || []).map(mapExecutionForm)
+}
+

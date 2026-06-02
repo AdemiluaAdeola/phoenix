@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
-import { listAssessments, listTestimonials, updateTestimonialStatus } from '../api/dbClient';
+import { listAssessments, listTestimonials, updateTestimonialStatus, listReadiness, listExecutionForms } from '../api/dbClient';
 import './AdminDashboard.css';
 
 const AdminDashboard = () => {
@@ -20,9 +20,14 @@ const AdminDashboard = () => {
   }, [navigate]);
 
   const getData = useCallback(async () => {
-    if (activeTab === 'clarity' || activeTab === 'readiness' || activeTab === 'execution') {
-      // Backend currently persists only the Assessment table.
+    if (activeTab === 'clarity') {
       return listAssessments();
+    }
+    if (activeTab === 'readiness') {
+      return listReadiness();
+    }
+    if (activeTab === 'execution') {
+      return listExecutionForms();
     }
     if (activeTab === 'testimonials') {
       return listTestimonials();

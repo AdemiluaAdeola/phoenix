@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react';
-import { db } from '../db';
+import { useState, useEffect } from 'react';
+import { listTestimonials } from '../api/dbClient';
 import './ClientStoriesPage.css';
 
 const ClientStoriesPage = () => {
@@ -7,9 +7,12 @@ const ClientStoriesPage = () => {
 
   useEffect(() => {
     const loadStories = async () => {
-      const allTestimonials = await db.testimonials.toArray();
-      const approved = allTestimonials.filter(t => t.status === 'Approved');
-      setStories(approved);
+      try {
+        const approved = await listTestimonials({ status: 'Approved' });
+        setStories(approved);
+      } catch (err) {
+        console.error('Failed to load testimonials from Supabase:', err);
+      }
     };
     loadStories();
   }, []);

@@ -10,8 +10,12 @@ CREATE TABLE IF NOT EXISTS public.assessments (
   responses JSONB,
   score INTEGER,
   archetype TEXT,
+  dim_scores JSONB,          -- [clarity, confidence, action, alignment, readiness] raw scores (0–25 each)
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
+
+-- If the table already exists, add the column with:
+-- ALTER TABLE public.assessments ADD COLUMN IF NOT EXISTS dim_scores JSONB;
 
 CREATE INDEX IF NOT EXISTS idx_assessments_email ON public.assessments(email);
 CREATE INDEX IF NOT EXISTS idx_assessments_created_at ON public.assessments(created_at);
@@ -41,8 +45,16 @@ CREATE TABLE IF NOT EXISTS public.readiness (
   last_name TEXT NOT NULL,
   email TEXT NOT NULL,
   score INTEGER,
+  responses JSONB,           -- full array of coach rating answers
+  session_type TEXT,         -- e.g. 'clarity-intensive' | 'week1'
+  session_date DATE,         -- date of the session being evaluated
   created_at TIMESTAMP WITH TIME ZONE DEFAULT now()
 );
+
+-- If the table already exists, add the columns with:
+-- ALTER TABLE public.readiness ADD COLUMN IF NOT EXISTS responses JSONB;
+-- ALTER TABLE public.readiness ADD COLUMN IF NOT EXISTS session_type TEXT;
+-- ALTER TABLE public.readiness ADD COLUMN IF NOT EXISTS session_date DATE;
 
 CREATE INDEX IF NOT EXISTS idx_readiness_email ON public.readiness(email);
 CREATE INDEX IF NOT EXISTS idx_readiness_created_at ON public.readiness(created_at);

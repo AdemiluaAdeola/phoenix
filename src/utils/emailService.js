@@ -155,11 +155,53 @@ function buildEmailHTML(data) {
 }
 
 
+/* ── ConvertKit (Kit.com) subscription helper ── */
+export const subscribeToConvertKit = async (assessmentData) => {
+  const apiKey = import.meta.env?.VITE_CONVERTKIT_API_KEY || '';
+  const formId = import.meta.env?.VITE_CONVERTKIT_FORM_ID || '';
+
+  if (!apiKey || !formId) {
+    return null;
+  }
+
+  const url = `https://api.convertkit.com/v3/forms/${formId}/subscribe`;
+  const payload = {
+    api_key: apiKey,
+    email: assessmentData.email,
+    first_name: assessmentData.firstName,
+    fields: {
+      last_name: assessmentData.lastName,
+      clarity_score: assessmentData.score,
+      archetype: assessmentData.archetypeName || assessmentData.archetype,
+      clarity_dimension_score: Math.round(((assessmentData.dimScores?.[0] || 0) / 25) * 20),
+      confidence_dimension_score: Math.round(((assessmentData.dimScores?.[1] || 0) / 25) * 20),
+      action_dimension_score: Math.round(((assessmentData.dimScores?.[2] || 0) / 25) * 20),
+      alignment_dimension_score: Math.round(((assessmentData.dimScores?.[3] || 0) / 25) * 20),
+      readiness_dimension_score: Math.round(((assessmentData.dimScores?.[4] || 0) / 25) * 20)
+    }
+  };
+
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload)
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(text || `ConvertKit subscription failed: ${res.status}`);
+  }
+
+  return res.json();
+};
+
 /* ── Main email sender ── */
 export const sendAssessmentEmail = async (assessmentData) => {
   const serviceId = import.meta.env?.VITE_EMAILJS_SERVICE_ID || '';
   const templateId = import.meta.env?.VITE_EMAILJS_TEMPLATE_ID || '';
   const publicKey = import.meta.env?.VITE_EMAILJS_PUBLIC_KEY || '';
+  const ckApiKey = import.meta.env?.VITE_CONVERTKIT_API_KEY || '';
+  const ckFormId = import.meta.env?.VITE_CONVERTKIT_FORM_ID || '';
 
   // Build rich HTML content for the email body
   const emailHTML = buildEmailHTML(assessmentData);
@@ -183,23 +225,39 @@ export const sendAssessmentEmail = async (assessmentData) => {
     alignment_score: Math.round(((assessmentData.dimScores?.[4] || 0) / 25) * 20),
   };
 
-  // ── Attempt live EmailJS delivery ──
-  if (serviceId && templateId && publicKey) {
+  let convertKitSubscribed = false;
+  let emailSent = false;
+
+  // 1. Attempt ConvertKit (Kit.com) Subscription if credentials exist
+  if (ckApiKey && ckFormId) {
     try {
-      // Initialise the SDK with the public key
-      emailjs.init(publicKey);
-
-      const response = await emailjs.send(serviceId, templateId, templateParams);
-
-      console.log('✅ Email sent via EmailJS:', response.status, response.text);
-      return { success: true, method: 'EmailJS', response };
+      await subscribeToConvertKit(assessmentData);
+      console.log('✅ Subscribed to Kit.com (ConvertKit)');
+      convertKitSubscribed = true;
     } catch (err) {
-      console.error('❌ EmailJS send failed – falling back to local simulation.', err);
-      // Fall through to simulation below
+      console.error('❌ Kit.com (ConvertKit) subscription failed:', err);
     }
   }
 
-  // ── Simulated local delivery (development fallback) ──
+  // 2. Attempt EmailJS sending if credentials exist
+  if (serviceId && templateId && publicKey) {
+    try {
+      emailjs.init(publicKey);
+      const response = await emailjs.send(serviceId, templateId, templateParams);
+      console.log('✅ Email sent via EmailJS:', response.status, response.text);
+      emailSent = true;
+      return { success: true, method: 'EmailJS', response, convertKitSubscribed };
+    } catch (err) {
+      console.error('❌ EmailJS send failed:', err);
+    }
+  }
+
+  // If ConvertKit succeeded, count it as a success for the client (as Kit can send automated emails)
+  if (convertKitSubscribed) {
+    return { success: true, method: 'ConvertKit', convertKitSubscribed };
+  }
+
+  // 3. Simulated local delivery fallback
   return new Promise((resolve) => {
     setTimeout(() => {
       console.log(

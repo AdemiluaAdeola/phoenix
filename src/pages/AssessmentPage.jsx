@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { db } from '../db';
+import { createAssessment, createReadiness, createExecutionForm, createTestimonial } from '../api/dbClient';
 import './AssessmentPage.css';
 
 
@@ -328,7 +328,11 @@ const ClarityAssessment = ({ navigate }) => {
       archetype,
       archetypeName: archetypes[archetype].name
     };
-    await db.assessments.add(assessmentData);
+    try {
+      await createAssessment(assessmentData);
+    } catch (err) {
+      console.error("Failed to persist clarity assessment to Supabase:", err);
+    }
     navigate('/assessment-complete', { state: assessmentData });
   };
 
@@ -529,8 +533,20 @@ const GenericAssessment = ({ title, type, questions }) => {
       score,
     };
 
-    if (type === 'readiness') await db.readiness.add(data);
-    if (type === 'execution') await db.execution.add(data);
+    if (type === 'readiness') {
+      try {
+        await createReadiness(data);
+      } catch (err) {
+        console.error("Failed to persist readiness assessment to Supabase:", err);
+      }
+    }
+    if (type === 'execution') {
+      try {
+        await createExecutionForm(data);
+      } catch (err) {
+        console.error("Failed to persist execution assessment to Supabase:", err);
+      }
+    }
 
     alert('Assessment Submitted');
     setAnswers(Array(questions.length).fill(null));
@@ -658,7 +674,12 @@ const TestimonialForm = ({ navigate }) => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    await db.testimonials.add({ ...formData, status: 'Pending Review', date: new Date().toISOString() });
+    const testimonialData = { ...formData, status: 'Pending Review', date: new Date().toISOString() };
+    try {
+      await createTestimonial(testimonialData);
+    } catch (err) {
+      console.error("Failed to persist testimonial to Supabase:", err);
+    }
     alert('Thank you for sharing your story! It is now pending review.');
     navigate('/client-stories');
   };
