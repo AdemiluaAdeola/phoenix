@@ -1,23 +1,32 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import * as XLSX from 'xlsx';
-import { saveAs } from 'file-saver';
-import { listAssessments, listTestimonials, updateTestimonialStatus, listReadiness, listExecutionForms } from '../api/dbClient';
+import { env } from '../config/env';
+import {
+  fetchAllRows,
+  listAssessments,
+  listExecutionForms,
+  listReadiness,
+  listTestimonials,
+  updateTestimonialStatus,
+} from '../api/dbClient';
+import { getSupabaseClient } from '../lib/supabaseClient';
+import { downloadCsv } from '../utils/csvExport';
 import './AdminDashboard.css';
+
+const tableByTab = {
+  clarity: env.supabaseAssessmentsTable,
+  readiness: env.supabaseReadinessTable,
+  execution: env.supabaseExecutionFormsTable,
+  testimonials: env.supabaseTestimonialsTable,
+};
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('clarity');
   const [data, setData] = useState([]);
-
-  useEffect(() => {
-    const checkAuth = () => {
-      if (localStorage.getItem('isAuthenticated') !== 'true') {
-        navigate('/login');
-      }
-    };
-    checkAuth();
-  }, [navigate]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
+  const [error, setError] = useState('');
 
   const getData = useCallback(async () => {
     if (activeTab === 'clarity') {
@@ -37,50 +46,92 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     let isMounted = true;
-    getData().then((result) => {
-      if (isMounted) setData(result);
-    });
+
+    const loadData = async () => {
+      setIsLoading(true);
+      setError('');
+
+      try {
+        const result = await getData();
+        if (isMounted) setData(result);
+      } catch (err) {
+        console.error(err);
+        if (isMounted) {
+          setData([]);
+          setError(err.message || 'Unable to load dashboard data.');
+        }
+      } finally {
+        if (isMounted) setIsLoading(false);
+      }
+    };
+
+    loadData();
+
     return () => {
       isMounted = false;
     };
   }, [getData]);
 
-  const handleLogout = () => {
-    localStorage.removeItem('isAuthenticated');
+  const handleLogout = async () => {
+    const { client } = getSupabaseClient();
+    await client?.auth.signOut();
     navigate('/login');
   };
 
-  const exportToExcel = () => {
-    const exportData = data.map((item) => {
-      const rest = { ...item };
-      delete rest.id;
-      delete rest.answers;
-      return {
-        ...rest,
-        date: new Date(rest.date).toLocaleString(),
-      };
-    });
-    const worksheet = XLSX.utils.json_to_sheet(exportData);
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(workbook, worksheet, activeTab);
-    const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-    const blob = new Blob([excelBuffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8' });
-    saveAs(blob, `Phoenix_${activeTab}_${new Date().toISOString().split('T')[0]}.xlsx`);
+  const exportAllRowsToCsv = async () => {
+    const tableName = tableByTab[activeTab];
+
+    if (!tableName) {
+      setError(`No Supabase table is configured for ${activeTab}.`);
+      return;
+    }
+
+    setIsExporting(true);
+    setError('');
+
+    try {
+      const rows = await fetchAllRows(tableName);
+
+      if (rows.length === 0) {
+        setError(`No rows found in ${tableName}.`);
+        return;
+      }
+
+      downloadCsv(rows, `Phoenix_${tableName}_${new Date().toISOString().slice(0, 10)}.csv`);
+    } catch (err) {
+      console.error(err);
+      setError(err.message || `Unable to export ${tableName}.`);
+    } finally {
+      setIsExporting(false);
+    }
   };
 
   const approveTestimonial = async (id) => {
-    await updateTestimonialStatus(id, 'Approved');
-    setData(await getData());
+    try {
+      setError('');
+      await updateTestimonialStatus(id, 'Approved');
+      setData(await getData());
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Unable to approve testimonial.');
+    }
   };
 
   const rejectTestimonial = async (id) => {
-    await updateTestimonialStatus(id, 'Rejected');
-    setData(await getData());
+    try {
+      setError('');
+      await updateTestimonialStatus(id, 'Rejected');
+      setData(await getData());
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Unable to reject testimonial.');
+    }
   };
 
   const totalRecords = data.length;
+  const scoredRecords = data.filter(item => item.score !== undefined && item.score !== null);
   const averageScore = data.length
-    ? Math.round(data.reduce((sum, item) => sum + (Number(item.score) || 0), 0) / data.filter(item => item.score !== undefined).length)
+    ? Math.round(scoredRecords.reduce((sum, item) => sum + (Number(item.score) || 0), 0) / scoredRecords.length)
     : 0;
   const pendingTestimonials = activeTab === 'testimonials'
     ? data.filter(item => item.status === 'Pending Review').length
@@ -103,7 +154,9 @@ const AdminDashboard = () => {
         <h1>Admin <em>Dashboard</em></h1>
         <p>Review assessment records, export client data, and manage stories from one focused workspace.</p>
         <div className="admin-actions" style={{ marginTop: '12px' }}>
-          <button onClick={exportToExcel} className="btn btn-gold">Export {activeTab}</button>
+          <button onClick={exportAllRowsToCsv} className="btn btn-gold" disabled={isExporting}>
+            {isExporting ? 'Exporting...' : `Export all ${activeTab}`}
+          </button>
           <button onClick={handleLogout} className="btn btn-secondary">Logout</button>
         </div>
       </div>
@@ -139,6 +192,11 @@ const AdminDashboard = () => {
       </div>
 
       <div className="admin-table-card">
+        {error && (
+          <div className="admin-error" role="alert">
+            {error}
+          </div>
+        )}
         <div className="admin-table-header">
           <div>
             <div className="admin-table-label">{activeTab}</div>
@@ -160,7 +218,16 @@ const AdminDashboard = () => {
             </tr>
           </thead>
           <tbody>
-            {data.length === 0 ? (
+            {isLoading ? (
+              <tr>
+                <td colSpan="8">
+                  <div className="admin-empty">
+                    <div>Loading {activeTab} records...</div>
+                    <p>Please wait while the dashboard connects to Supabase.</p>
+                  </div>
+                </td>
+              </tr>
+            ) : data.length === 0 ? (
               <tr>
                 <td colSpan="8">
                   <div className="admin-empty">

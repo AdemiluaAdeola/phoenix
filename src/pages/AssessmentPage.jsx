@@ -3,29 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { createAssessment, createReadiness, createExecutionForm, createTestimonial } from '../api/dbClient';
 import './AssessmentPage.css';
 
-
-function MobileFieldGroup({ title, children }) {
-  const [open, setOpen] = useState(false);
-
-  return (
-    <div className="mobile-field-group">
-      <button
-        type="button"
-        className="mobile-field-toggle"
-        aria-expanded={open}
-        onClick={() => setOpen((v) => !v)}
-      >
-        <span className="mobile-field-title">{title}</span>
-        <span className="mobile-field-caret">▾</span>
-      </button>
-
-      <div className={`mobile-field-panel ${open ? 'open' : ''}`}>{children}</div>
-    </div>
-  );
-}
-
-
-
 const clarityDimensions = [
   "Strengths & Skills",
   "Values & What Matters",
@@ -292,6 +269,8 @@ const ClarityAssessment = ({ navigate }) => {
   const [currentQuestion, setCurrentQuestion] = useState(0);
   const [formData, setFormData] = useState({ firstName: '', lastName: '', email: '', gender: '', source: '', context: '' });
   const [answers, setAnswers] = useState(Array(clarityQuestions.length).fill(null));
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
 
   const handleIntakeSubmit = (e) => {
     e.preventDefault();
@@ -312,10 +291,18 @@ const ClarityAssessment = ({ navigate }) => {
   };
 
   const handleSubmit = async () => {
+    if (isSubmitting) {
+      return;
+    }
+
     if (answers.includes(null)) {
       alert("Please answer all questions before submitting.");
       return;
     }
+
+    setIsSubmitting(true);
+    setSubmitError('');
+
     const score = calculateScore();
     const dimScores = calculateDimensionScores();
     const archetype = determineArchetypeFromClarity(dimScores);
@@ -328,15 +315,30 @@ const ClarityAssessment = ({ navigate }) => {
       archetype,
       archetypeName: archetypes[archetype].name
     };
+
     try {
-      await createAssessment(assessmentData);
+      const savedAssessment = await createAssessment(assessmentData);
+      navigate('/assessment-complete', {
+        state: {
+          ...assessmentData,
+          id: savedAssessment?.id,
+          assessmentId: savedAssessment?.id,
+          savedAssessment,
+        },
+      });
     } catch (err) {
       console.error("Failed to persist clarity assessment to Supabase:", err);
+      setSubmitError(err.message || 'Your assessment could not be saved to Supabase. Please try again.');
+    } finally {
+      setIsSubmitting(false);
     }
-    navigate('/assessment-complete', { state: assessmentData });
   };
 
   const handleNext = () => {
+    if (isSubmitting) {
+      return;
+    }
+
     if (!answers[currentQuestion]) {
       alert('Please select a response before continuing.');
       return;
@@ -484,8 +486,15 @@ const ClarityAssessment = ({ navigate }) => {
           </div>
           <div className="nav-row">
             <button className="btn btn-secondary" disabled={currentQuestion === 0} onClick={() => setCurrentQuestion(currentQuestion - 1)}>← Back</button>
-            <button className="btn btn-primary" onClick={handleNext}>{currentQuestion === clarityQuestions.length - 1 ? 'View My Results →' : 'Next →'}</button>
+            <button className="btn btn-primary" onClick={handleNext} disabled={isSubmitting}>
+              {isSubmitting ? 'Saving Results...' : currentQuestion === clarityQuestions.length - 1 ? 'View My Results →' : 'Next →'}
+            </button>
           </div>
+          {submitError && (
+            <div className="assessment-submit-error" role="alert">
+              {submitError}
+            </div>
+          )}
         </div>
       )}
     </>

@@ -1,6 +1,7 @@
 // Redirect all API calls directly to Supabase REST client
 export {
   createAssessment,
+  fetchAllRows,
   listAssessments,
   createTestimonial,
   listTestimonials,

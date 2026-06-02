@@ -1,5 +1,6 @@
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
+import AdminRoute from './components/AdminRoute';
 import LandingPage from './pages/LandingPage';
 import AssessmentPage from './pages/AssessmentPage';
 import AssessmentCompletePage from './pages/AssessmentCompletePage';
@@ -18,7 +19,14 @@ function App() {
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/client-stories" element={<ClientStoriesPage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/admin" element={<AdminDashboard />} />
+        <Route
+          path="/admin"
+          element={(
+            <AdminRoute>
+              <AdminDashboard />
+            </AdminRoute>
+          )}
+        />
       </Routes>
     </Layout>
   );

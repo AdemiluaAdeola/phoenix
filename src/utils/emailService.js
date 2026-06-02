@@ -1,19 +1,19 @@
 /**
  * Email Service for Phoenix Assessment Platform
  * ─────────────────────────────────────────────
- * Sends assessment results to the user's email via EmailJS.
+ * Sends assessment results to the user's email through Resend.
  *
  * Configuration:
  *   Set these in your .env file:
- *     VITE_EMAILJS_SERVICE_ID   — your EmailJS service ID (e.g. "service_xxxxxx")
- *     VITE_EMAILJS_TEMPLATE_ID  — your EmailJS template ID (e.g. "template_xxxxxx")
- *     VITE_EMAILJS_PUBLIC_KEY   — your EmailJS public key  (e.g. "xXxXxXxXxXx")
+ *     VITE_RESEND_API_KEY      - Resend API key for prototype/browser usage only
+ *     VITE_RESEND_FROM_EMAIL   - verified sender, e.g. "Phoenix <noreply@example.com>"
+ *     VITE_EMAIL_API_URL       - optional production-safe backend endpoint
  *
- *   When env vars are missing the service falls back to a local simulation
- *   so the UI still works during development.
+ * For production, prefer VITE_EMAIL_API_URL so the Resend secret never ships
+ * to the browser.
  */
 
-import emailjs from '@emailjs/browser';
+import { sendEmail } from '../lib/resendClient';
 
 /* ── Archetype data (mirror of completion page) ── */
 const archetypes = {
@@ -155,120 +155,42 @@ function buildEmailHTML(data) {
 }
 
 
-/* ── ConvertKit (Kit.com) subscription helper ── */
-export const subscribeToConvertKit = async (assessmentData) => {
-  const apiKey = import.meta.env?.VITE_CONVERTKIT_API_KEY || '';
-  const formId = import.meta.env?.VITE_CONVERTKIT_FORM_ID || '';
+function buildEmailText(data) {
+  const archetype = archetypes[data.archetype] || archetypes.awakening;
 
-  if (!apiKey || !formId) {
-    return null;
-  }
-
-  const url = `https://api.convertkit.com/v3/forms/${formId}/subscribe`;
-  const payload = {
-    api_key: apiKey,
-    email: assessmentData.email,
-    first_name: assessmentData.firstName,
-    fields: {
-      last_name: assessmentData.lastName,
-      clarity_score: assessmentData.score,
-      archetype: assessmentData.archetypeName || assessmentData.archetype,
-      clarity_dimension_score: Math.round(((assessmentData.dimScores?.[0] || 0) / 25) * 20),
-      confidence_dimension_score: Math.round(((assessmentData.dimScores?.[1] || 0) / 25) * 20),
-      action_dimension_score: Math.round(((assessmentData.dimScores?.[2] || 0) / 25) * 20),
-      alignment_dimension_score: Math.round(((assessmentData.dimScores?.[3] || 0) / 25) * 20),
-      readiness_dimension_score: Math.round(((assessmentData.dimScores?.[4] || 0) / 25) * 20)
-    }
-  };
-
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(payload)
-  });
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => '');
-    throw new Error(text || `ConvertKit subscription failed: ${res.status}`);
-  }
-
-  return res.json();
-};
+  return [
+    `Dear ${data.firstName},`,
+    '',
+    'Thank you for completing the Phoenix Clarity Assessment.',
+    '',
+    `Your clarity score: ${data.score ?? 0}/100`,
+    `Your archetype: ${archetype.name}`,
+    '',
+    archetype.directRead,
+    '',
+    'Book your Clarity Session: https://www.phoenixclearinsight.com/book',
+  ].join('\n');
+}
 
 /* ── Main email sender ── */
 export const sendAssessmentEmail = async (assessmentData) => {
-  const serviceId = import.meta.env?.VITE_EMAILJS_SERVICE_ID || '';
-  const templateId = import.meta.env?.VITE_EMAILJS_TEMPLATE_ID || '';
-  const publicKey = import.meta.env?.VITE_EMAILJS_PUBLIC_KEY || '';
-  const ckApiKey = import.meta.env?.VITE_CONVERTKIT_API_KEY || '';
-  const ckFormId = import.meta.env?.VITE_CONVERTKIT_FORM_ID || '';
-
-  // Build rich HTML content for the email body
   const emailHTML = buildEmailHTML(assessmentData);
-
-  // Prepare template parameters consumed by the EmailJS template
-  const templateParams = {
-    to_name: `${assessmentData.firstName} ${assessmentData.lastName}`,
-    to_email: assessmentData.email,
-    from_name: 'Phoenix Clear Insight',
+  const result = await sendEmail({
+    to: assessmentData.email,
     subject: 'Your Personal Phoenix Clarity Assessment Report',
-    score: assessmentData.score,
-    archetype: assessmentData.archetypeName || assessmentData.archetype,
-    date: new Date(assessmentData.date).toLocaleDateString(),
-    // HTML content of the full report — map to {{message_html}} or {{message}} in EmailJS template
-    message_html: emailHTML,
-    // Dimension scores for simple-template fallback
-    strengths_score: Math.round(((assessmentData.dimScores?.[0] || 0) / 25) * 20),
-    values_score: Math.round(((assessmentData.dimScores?.[1] || 0) / 25) * 20),
-    patterns_score: Math.round(((assessmentData.dimScores?.[2] || 0) / 25) * 20),
-    direction_score: Math.round(((assessmentData.dimScores?.[3] || 0) / 25) * 20),
-    alignment_score: Math.round(((assessmentData.dimScores?.[4] || 0) / 25) * 20),
-  };
-
-  let convertKitSubscribed = false;
-  let emailSent = false;
-
-  // 1. Attempt ConvertKit (Kit.com) Subscription if credentials exist
-  if (ckApiKey && ckFormId) {
-    try {
-      await subscribeToConvertKit(assessmentData);
-      console.log('✅ Subscribed to Kit.com (ConvertKit)');
-      convertKitSubscribed = true;
-    } catch (err) {
-      console.error('❌ Kit.com (ConvertKit) subscription failed:', err);
-    }
-  }
-
-  // 2. Attempt EmailJS sending if credentials exist
-  if (serviceId && templateId && publicKey) {
-    try {
-      emailjs.init(publicKey);
-      const response = await emailjs.send(serviceId, templateId, templateParams);
-      console.log('✅ Email sent via EmailJS:', response.status, response.text);
-      emailSent = true;
-      return { success: true, method: 'EmailJS', response, convertKitSubscribed };
-    } catch (err) {
-      console.error('❌ EmailJS send failed:', err);
-    }
-  }
-
-  // If ConvertKit succeeded, count it as a success for the client (as Kit can send automated emails)
-  if (convertKitSubscribed) {
-    return { success: true, method: 'ConvertKit', convertKitSubscribed };
-  }
-
-  // 3. Simulated local delivery fallback
-  return new Promise((resolve) => {
-    setTimeout(() => {
-      console.log(
-        '📬 [Simulated] Assessment results email for:',
-        assessmentData.email,
-        '\nTemplate params:',
-        templateParams,
-      );
-      resolve({ success: true, method: 'Simulation' });
-    }, 1500);
+    html: emailHTML,
+    text: buildEmailText(assessmentData),
   });
+
+  if (result.error) {
+    throw new Error(result.error);
+  }
+
+  return {
+    success: true,
+    method: 'Resend',
+    response: result.data,
+  };
 };
 
 /**

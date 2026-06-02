@@ -2,6 +2,13 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 
 const execAsync = promisify(exec);
+const SUPABASE_DB_PASSWORD = process.env.SUPABASE_DB_PASSWORD;
+const SUPABASE_DB_USER = process.env.SUPABASE_DB_USER;
+const SUPABASE_PROJECT_REF = process.env.SUPABASE_PROJECT_REF;
+
+if (!SUPABASE_DB_PASSWORD || !SUPABASE_DB_USER || !SUPABASE_PROJECT_REF) {
+  throw new Error('Set SUPABASE_DB_PASSWORD, SUPABASE_DB_USER, and SUPABASE_PROJECT_REF before running this script.');
+}
 
 const regions = [
   'eu-west-1',
@@ -22,7 +29,7 @@ const regions = [
 
 async function checkRegion(region) {
   const host = `aws-0-${region}.pooler.supabase.com`;
-  const cmd = `PGPASSWORD="3GwESJGcV633hMRa" psql -h ${host} -p 6543 -U postgres.kmrambclpujmnyxbfkjh -d postgres -c "SELECT 1;" -t`;
+  const cmd = `PGPASSWORD="${SUPABASE_DB_PASSWORD}" psql -h ${host} -p 6543 -U ${SUPABASE_DB_USER} -d postgres -c "SELECT 1;" -t`;
   
   try {
     const { stdout } = await execAsync(cmd, { timeout: 3000 });
@@ -33,7 +40,7 @@ async function checkRegion(region) {
 }
 
 async function main() {
-  console.log('Scanning regional Supabase poolers for tenant kmrambclpujmnyxbfkjh...\n');
+  console.log(`Scanning regional Supabase poolers for tenant ${SUPABASE_PROJECT_REF}...\n`);
   const results = await Promise.all(regions.map(r => checkRegion(r)));
   
   for (const res of results) {

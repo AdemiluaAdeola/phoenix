@@ -1,4 +1,4 @@
--- Create assessments table
+-- Create assessment table
 CREATE TABLE IF NOT EXISTS public.assessments (
   id BIGSERIAL PRIMARY KEY,
   first_name TEXT NOT NULL,

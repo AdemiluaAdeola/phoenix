@@ -1,21 +1,43 @@
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { getSupabaseClient } from '../lib/supabaseClient';
 import './LoginPage.css';
 
 const LoginPage = () => {
-  const [username, setUsername] = useState('');
+  const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    if (username === 'phoenix' && password === 'phoenix2026') {
-      localStorage.setItem('isAuthenticated', 'true');
-      navigate('/admin');
-    } else {
-      setError('Invalid username or password');
+    setIsSubmitting(true);
+    setError('');
+
+    const { client, error: clientError } = getSupabaseClient();
+
+    if (clientError || !client) {
+      setError(clientError || 'Supabase is not configured correctly.');
+      setIsSubmitting(false);
+      return;
     }
+
+    const { error: authError } = await client.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (authError) {
+      setError(authError.message || 'Invalid email or password.');
+      setIsSubmitting(false);
+      return;
+    }
+
+    const destination = location.state?.from?.pathname || '/admin';
+    navigate(destination, { replace: true });
+    setIsSubmitting(false);
   };
 
   return (
@@ -32,12 +54,13 @@ const LoginPage = () => {
 
           <form onSubmit={handleLogin}>
             <div className="form-group">
-              <label>Username</label>
+              <label>Email</label>
               <input 
-                type="text" 
-                value={username} 
-                onChange={(e) => setUsername(e.target.value)} 
-                placeholder="Enter username"
+                type="email" 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                placeholder="admin@example.com"
+                autoComplete="email"
                 required 
               />
             </div>
@@ -49,12 +72,18 @@ const LoginPage = () => {
                 value={password} 
                 onChange={(e) => setPassword(e.target.value)} 
                 placeholder="Enter password"
+                autoComplete="current-password"
                 required 
               />
             </div>
 
-            <button type="submit" className="btn btn-primary scale-on-hover" style={{ width: '100%', marginTop: '10px' }}>
-              Sign In →
+            <button
+              type="submit"
+              className="btn btn-primary scale-on-hover"
+              style={{ width: '100%', marginTop: '10px' }}
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? 'Signing In...' : 'Sign In →'}
             </button>
           </form>
 

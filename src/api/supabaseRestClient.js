@@ -1,67 +1,51 @@
-// Supports both Vite (browser) and plain Node (for smoke tests).
-const nodeEnv = globalThis.process?.env || {};
-
-const SUPABASE_URL =
-  // Vite/browser
-  (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_SUPABASE_URL) ||
-  // Node/smoke test
-  nodeEnv.SUPABASE_URL ||
-  // Fallback: REST host (preferred over dashboard URL)
-  'https://kmrambclpujmnyxbfkjh.supabase.co';
-
-const SUPABASE_ANON_KEY =
-  (typeof import.meta !== 'undefined' && import.meta?.env?.VITE_SUPABASE_ANON_KEY) ||
-  nodeEnv.SUPABASE_ANON_KEY ||
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImttcmFtYmNscHVqbW55eGJma2poIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk1NzMyNjcsImV4cCI6MjA5NTE0OTI2N30.o9Yyoqbk9uPRVaHyg1lrCGEBNHOZyQzgzZZYQD7R8lA';
-
-
-function assertConfigured() {
-  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    throw new Error(
-      'Supabase is not configured. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in the Vite environment.'
-    )
-  }
-}
-
-async function supabaseFetch(path, { method = 'GET', headers = {}, body } = {}) {
-  assertConfigured()
-
-  const url = `${SUPABASE_URL}${path}`
-  const res = await fetch(url, {
-    method,
-    headers: {
-      apikey: SUPABASE_ANON_KEY,
-      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-      ...(body ? { 'Content-Type': 'application/json' } : {}),
-      ...headers
-    },
-    body: body ? JSON.stringify(body) : undefined
-  })
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => '')
-    throw new Error(text || `Supabase request failed: ${res.status}`)
-  }
-
-  // Supabase REST usually returns JSON, but DELETE/PATCH might return differently.
-  // Try JSON first, fallback to text.
-  const contentType = res.headers.get('content-type') || ''
-  if (contentType.includes('application/json')) return res.json()
-  return res.text()
-}
-
-/**
- * assessments table
- * - Schema assumption based on existing Dexie:
- *   firstName, lastName, email, identity, source, context, responses (json), score, archetype (optional), createdAt (timestamp)
- */
-// ── MAPPING HELPERS ──
+import { getSupabaseClient } from '../lib/supabaseClient';
+import { env } from '../config/env';
 
 const archetypeNames = {
   phoenix_momentum: 'Phoenix Momentum',
   dreaming: 'Dreaming',
   awakening: 'Awakening',
 };
+
+function assertSupabaseClient() {
+  const { client, error } = getSupabaseClient();
+
+  if (error || !client) {
+    throw new Error(error || 'Supabase is not configured correctly.');
+  }
+
+  return client;
+}
+
+function handleSupabaseError(error, fallbackMessage) {
+  if (!error) return;
+  throw new Error(error.message || fallbackMessage);
+}
+
+async function debugInsert({ tableName, row, error, fallbackMessage }) {
+  // This function is only meant for richer error context.
+  const errorDetails = {
+    message: error?.message,
+    details: error?.details,
+    hint: error?.hint,
+  };
+
+  // eslint-disable-next-line no-console
+  console.error('[supabaseRestClient] Insert failed', {
+    tableName,
+    row,
+    error: errorDetails,
+    fallbackMessage,
+  });
+
+  const msg = error?.message || errorDetails?.details || fallbackMessage;
+  throw new Error(msg);
+}
+
+function isMissingColumnError(error, columnName) {
+  const message = error?.message || error?.details || '';
+  return message.includes(columnName) && message.includes('schema cache');
+}
 
 export function mapAssessment(row) {
   if (!row) return null;
@@ -78,8 +62,8 @@ export function mapAssessment(row) {
     archetype: row.archetype,
     archetypeName: archetypeNames[row.archetype] || row.archetype || '',
     dimScores: Array.isArray(row.dim_scores) ? row.dim_scores : [],
-    date: row.created_at
-  }
+    date: row.created_at,
+  };
 }
 
 export function mapTestimonial(row) {
@@ -95,8 +79,8 @@ export function mapTestimonial(row) {
     shift: row.shift,
     after: row.after,
     status: row.status,
-    date: row.created_at
-  }
+    date: row.created_at,
+  };
 }
 
 export function mapReadiness(row) {
@@ -110,8 +94,8 @@ export function mapReadiness(row) {
     responses: row.responses,
     sessionType: row.session_type,
     sessionDate: row.session_date,
-    date: row.created_at
-  }
+    date: row.created_at,
+  };
 }
 
 export function mapExecutionForm(row) {
@@ -124,82 +108,33 @@ export function mapExecutionForm(row) {
     answers: row.responses,
     status: row.status,
     notes: row.notes,
-    date: row.created_at
-  }
+    date: row.created_at,
+  };
 }
 
-/**
- * assessments table
- */
-export async function createAssessment(payload) {
+function assessmentRow(payload, { includeDimScores = true } = {}) {
   const row = {
     first_name: payload.firstName,
     last_name: payload.lastName,
     email: payload.email,
-    identity: payload.identity ?? null,
+    identity: payload.identity ?? payload.gender ?? null,
     source: payload.source ?? null,
     context: payload.context ?? null,
     responses: payload.answers ?? payload.responses ?? [],
     score: Number(payload.score ?? 0),
     archetype: payload.archetype ?? null,
-    dim_scores: Array.isArray(payload.dimScores) ? payload.dimScores : null,
-    created_at: payload.date ?? new Date().toISOString()
+    created_at: payload.date ?? new Date().toISOString(),
+  };
+
+  if (includeDimScores) {
+    row.dim_scores = Array.isArray(payload.dimScores) ? payload.dimScores : null;
   }
 
-  const res = await supabaseFetch(`/rest/v1/assessments?select=*`, {
-    method: 'POST',
-    headers: {
-      Prefer: 'return=representation'
-    },
-    body: row
-  })
-  const records = Array.isArray(res) ? res : [res];
-  return mapAssessment(records[0]);
+  return row;
 }
 
-export async function listAssessments() {
-  const res = await supabaseFetch(
-    `/rest/v1/assessments?select=*&order=created_at.desc`
-  )
-  return (res || []).map(mapAssessment)
-}
-
-/**
- * testimonials table
- */
-export async function listTestimonials({ status } = {}) {
-  const query = status
-    ? `/rest/v1/testimonials?select=*&status=eq.${encodeURIComponent(status)}&order=created_at.desc`
-    : `/rest/v1/testimonials?select=*&order=created_at.desc`
-  const res = await supabaseFetch(query)
-  return (res || []).map(mapTestimonial)
-}
-
-export async function updateTestimonialStatus(id, status) {
-  if (!id || !Number.isFinite(Number(id))) {
-    throw new Error('Invalid testimonial id')
-  }
-  if (!status) {
-    throw new Error('Invalid status')
-  }
-
-  const rows = await supabaseFetch(
-    `/rest/v1/testimonials?id=eq.${encodeURIComponent(id)}&select=*`,
-    {
-      method: 'PATCH',
-      headers: {
-        Prefer: 'return=representation'
-      },
-      body: { status }
-    }
-  )
-
-  const updatedRow = Array.isArray(rows) ? rows[0] : rows;
-  return mapTestimonial(updatedRow);
-}
-
-export async function createTestimonial(payload) {
-  const row = {
+function testimonialRow(payload) {
+  return {
     first_name: payload.firstName ?? null,
     last_name: payload.lastName ?? null,
     anonymous: payload.anonymous ? String(payload.anonymous) : 'No',
@@ -209,25 +144,12 @@ export async function createTestimonial(payload) {
     shift: payload.shift ?? null,
     after: payload.after ?? null,
     status: payload.status ?? 'Pending Review',
-    created_at: payload.date ?? new Date().toISOString()
-  }
-
-  const res = await supabaseFetch(`/rest/v1/testimonials?select=*`, {
-    method: 'POST',
-    headers: {
-      Prefer: 'return=representation'
-    },
-    body: row
-  })
-  const records = Array.isArray(res) ? res : [res];
-  return mapTestimonial(records[0]);
+    created_at: payload.date ?? new Date().toISOString(),
+  };
 }
 
-/**
- * readiness table
- */
-export async function createReadiness(payload) {
-  const row = {
+function readinessRow(payload) {
+  return {
     first_name: payload.firstName,
     last_name: payload.lastName,
     email: payload.email,
@@ -235,52 +157,213 @@ export async function createReadiness(payload) {
     responses: payload.answers ?? payload.responses ?? [],
     session_type: payload.sessionType ?? null,
     session_date: payload.sessionDate ?? null,
-    created_at: payload.date ?? new Date().toISOString()
-  }
-
-  const res = await supabaseFetch(`/rest/v1/readiness?select=*`, {
-    method: 'POST',
-    headers: {
-      Prefer: 'return=representation'
-    },
-    body: row
-  })
-  const records = Array.isArray(res) ? res : [res];
-  return mapReadiness(records[0]);
+    created_at: payload.date ?? new Date().toISOString(),
+  };
 }
 
-export async function listReadiness() {
-  const res = await supabaseFetch(`/rest/v1/readiness?select=*&order=created_at.desc`)
-  return (res || []).map(mapReadiness)
-}
-
-/**
- * execution_forms table
- */
-export async function createExecutionForm(payload) {
-  const row = {
+function executionFormRow(payload) {
+  return {
     first_name: payload.firstName,
     last_name: payload.lastName,
     email: payload.email,
     responses: payload.answers ?? [],
     status: payload.status ?? 'Pending',
     notes: payload.notes ?? null,
-    created_at: payload.date ?? new Date().toISOString()
+    created_at: payload.date ?? new Date().toISOString(),
+  };
+}
+
+export async function createAssessment(payload) {
+  const supabase = assertSupabaseClient();
+
+  const insertAssessment = (row) => supabase
+    .from(env.supabaseAssessmentsTable)
+    .insert(row)
+    .select('*')
+    .single();
+
+  let { data, error } = await insertAssessment(assessmentRow(payload));
+
+  if (isMissingColumnError(error, 'dim_scores')) {
+    console.warn('Supabase assessments table is missing dim_scores. Retrying assessment insert without that optional column.');
+    ({ data, error } = await insertAssessment(assessmentRow(payload, { includeDimScores: false })));
   }
 
-  const res = await supabaseFetch(`/rest/v1/execution_forms?select=*`, {
-    method: 'POST',
-    headers: {
-      Prefer: 'return=representation'
-    },
-    body: row
-  })
-  const records = Array.isArray(res) ? res : [res];
-  return mapExecutionForm(records[0]);
+  handleSupabaseError(error, `Failed to create assessment in ${env.supabaseAssessmentsTable}.`);
+  return mapAssessment(data);
+}
+
+export async function listAssessments() {
+  const supabase = assertSupabaseClient();
+  const { data, error } = await supabase
+    .from(env.supabaseAssessmentsTable)
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  handleSupabaseError(error, `Failed to load assessments from ${env.supabaseAssessmentsTable}.`);
+  return (data || []).map(mapAssessment);
+}
+
+export async function fetchAllRows(tableName, { orderBy = 'created_at', ascending = false } = {}) {
+  if (!tableName) {
+    throw new Error('Missing Supabase table name.');
+  }
+
+  const supabase = assertSupabaseClient();
+  const pageSize = 1000;
+  let from = 0;
+  let rows = [];
+
+  while (true) {
+    let query = supabase
+      .from(tableName)
+      .select('*')
+      .range(from, from + pageSize - 1);
+
+    if (orderBy) {
+      query = query.order(orderBy, { ascending });
+    }
+
+    const { data, error } = await query;
+
+    handleSupabaseError(error, `Failed to fetch all rows from ${tableName}.`);
+
+    rows = rows.concat(data || []);
+
+    if (!data || data.length < pageSize) {
+      break;
+    }
+
+    from += pageSize;
+  }
+
+  return rows;
+}
+
+export async function createTestimonial(payload) {
+  const supabase = assertSupabaseClient();
+  const tableName = env.supabaseTestimonialsTable;
+  const row = testimonialRow(payload);
+
+  const { data, error } = await supabase
+    .from(tableName)
+    .insert(row)
+    .select('*')
+    .single();
+
+  if (error) {
+    return debugInsert({
+      tableName,
+      row,
+      error,
+      fallbackMessage: 'Failed to create testimonial.',
+    });
+  }
+
+  return mapTestimonial(data);
+}
+
+export async function listTestimonials({ status } = {}) {
+  const supabase = assertSupabaseClient();
+  let query = supabase
+    .from(env.supabaseTestimonialsTable)
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  if (status) {
+    query = query.eq('status', status);
+  }
+
+  const { data, error } = await query;
+  handleSupabaseError(error, 'Failed to load testimonials.');
+  return (data || []).map(mapTestimonial);
+}
+
+export async function updateTestimonialStatus(id, status) {
+  if (!id) {
+    throw new Error('Invalid testimonial id.');
+  }
+
+  if (!status) {
+    throw new Error('Invalid status.');
+  }
+
+  const supabase = assertSupabaseClient();
+  const { data, error } = await supabase
+    .from(env.supabaseTestimonialsTable)
+    .update({ status })
+    .eq('id', id)
+    .select('*')
+    .single();
+
+  handleSupabaseError(error, 'Failed to update testimonial.');
+  return mapTestimonial(data);
+}
+
+export async function createReadiness(payload) {
+  const supabase = assertSupabaseClient();
+  const tableName = env.supabaseReadinessTable;
+  const row = readinessRow(payload);
+
+  const { data, error } = await supabase
+    .from(tableName)
+    .insert(row)
+    .select('*')
+    .single();
+
+  if (error) {
+    return debugInsert({
+      tableName,
+      row,
+      error,
+      fallbackMessage: 'Failed to create readiness assessment.',
+    });
+  }
+
+  return mapReadiness(data);
+}
+
+export async function listReadiness() {
+  const supabase = assertSupabaseClient();
+  const { data, error } = await supabase
+    .from(env.supabaseReadinessTable)
+    .select('*')
+    .order('created_at', { ascending: false });
+
+  handleSupabaseError(error, 'Failed to load readiness records.');
+  return (data || []).map(mapReadiness);
+}
+
+export async function createExecutionForm(payload) {
+  const supabase = assertSupabaseClient();
+  const tableName = env.supabaseExecutionFormsTable;
+  const row = executionFormRow(payload);
+
+  const { data, error } = await supabase
+    .from(tableName)
+    .insert(row)
+    .select('*')
+    .single();
+
+  if (error) {
+    return debugInsert({
+      tableName,
+      row,
+      error,
+      fallbackMessage: 'Failed to create execution form.',
+    });
+  }
+
+  return mapExecutionForm(data);
 }
 
 export async function listExecutionForms() {
-  const res = await supabaseFetch(`/rest/v1/execution_forms?select=*&order=created_at.desc`)
-  return (res || []).map(mapExecutionForm)
-}
+  const supabase = assertSupabaseClient();
+  const { data, error } = await supabase
+    .from(env.supabaseExecutionFormsTable)
+    .select('*')
+    .order('created_at', { ascending: false });
 
+  handleSupabaseError(error, 'Failed to load execution records.');
+  return (data || []).map(mapExecutionForm);
+}

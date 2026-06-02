@@ -129,8 +129,11 @@ const AssessmentCompletePage = () => {
 
   const handleResend = async () => {
     setResending(true);
-    await triggerEmailSend();
-    setResending(false);
+    try {
+      await triggerEmailSend();
+    } finally {
+      setResending(false);
+    }
   };
 
   if (!data) {
