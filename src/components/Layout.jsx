@@ -10,7 +10,7 @@ const Layout = ({ children }) => {
         <div className="app-heading-tagline">See It · Believe It · Achieve It</div>
       </header>
 
-      <main>
+      <main role="main">
         {children}
       </main>
 

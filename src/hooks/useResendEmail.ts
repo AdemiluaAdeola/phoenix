@@ -1,5 +1,6 @@
 import { useState, useCallback } from "react";
-import { createClient } from "@supabase/supabase-js";
+import { getSupabaseClient } from "../lib/supabaseClient";
+import { env } from "../config/env";
 
 interface EmailPayload {
   to: string | string[];
@@ -29,21 +30,26 @@ export const useResendEmail = (): UseResendEmailReturn => {
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const supabase = createClient(
-    import.meta.env.VITE_SUPABASE_URL,
-    import.meta.env.VITE_SUPABASE_ANON_KEY
-  );
-
   const sendEmail = useCallback(async (payload: EmailPayload) => {
     setLoading(true);
     setError(null);
     setSuccess(false);
 
+    const { client, error: clientError } = getSupabaseClient();
+    if (!client) {
+      const message = clientError || "Supabase is not configured.";
+      setError(message);
+      return null;
+    }
+
     try {
-      const { data, error: invokeError } = await supabase.functions.invoke<EmailResponse>(
+      const { data, error: invokeError } = await client.functions.invoke<EmailResponse>(
         "send-email",
         {
-          body: payload,
+          body: {
+            ...payload,
+            from: payload.from || env.resendFromEmail || undefined,
+          },
         }
       );
 
@@ -64,7 +70,7 @@ export const useResendEmail = (): UseResendEmailReturn => {
     } finally {
       setLoading(false);
     }
-  }, [supabase]);
+  }, []);
 
   const reset = useCallback(() => {
     setLoading(false);

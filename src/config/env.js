@@ -56,7 +56,6 @@ export function validateClientEnv() {
 
 // Dev-time diagnostics so we can confirm the frontend is targeting the expected Supabase tables.
 if (import.meta.env && import.meta.env.DEV) {
-  // eslint-disable-next-line no-console
   console.log('[env] Supabase tables:', {
     assessments: env.supabaseAssessmentsTable,
     testimonials: env.supabaseTestimonialsTable,

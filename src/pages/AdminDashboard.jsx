@@ -109,22 +109,36 @@ const AdminDashboard = () => {
   const approveTestimonial = async (id) => {
     try {
       setError('');
+      // Optimistically update the UI
+      setData(data.map(item =>
+        item.id === id ? { ...item, status: 'Approved' } : item
+      ));
       await updateTestimonialStatus(id, 'Approved');
+      // Refresh in case there were concurrent updates
       setData(await getData());
     } catch (err) {
       console.error(err);
       setError(err.message || 'Unable to approve testimonial.');
+      // Refetch to restore correct state on error
+      setData(await getData());
     }
   };
 
   const rejectTestimonial = async (id) => {
     try {
       setError('');
+      // Optimistically update the UI
+      setData(data.map(item =>
+        item.id === id ? { ...item, status: 'Rejected' } : item
+      ));
       await updateTestimonialStatus(id, 'Rejected');
+      // Refresh in case there were concurrent updates
       setData(await getData());
     } catch (err) {
       console.error(err);
       setError(err.message || 'Unable to reject testimonial.');
+      // Refetch to restore correct state on error
+      setData(await getData());
     }
   };
 

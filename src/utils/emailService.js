@@ -3,14 +3,16 @@
  * ─────────────────────────────────────────────
  * Sends assessment results to the user's email through Resend.
  *
- * Configuration:
- *   Set these in your .env file:
- *     VITE_RESEND_API_KEY      - Resend API key for prototype/browser usage only
- *     VITE_RESEND_FROM_EMAIL   - verified sender, e.g. "Phoenix <noreply@example.com>"
- *     VITE_EMAIL_API_URL       - optional production-safe backend endpoint
+ * Delivery path (see resendClient.js):
+ *   1. VITE_EMAIL_API_URL — optional custom backend proxy
+ *   2. Supabase `send-email` edge function — recommended (Resend key stays server-side)
+ *   3. Direct browser Resend call — dev fallback only
  *
- * For production, prefer VITE_EMAIL_API_URL so the Resend secret never ships
- * to the browser.
+ * Required Supabase secrets (Edge Functions → Secrets):
+ *   RESEND_API_KEY
+ *   RESEND_FROM_EMAIL  — e.g. Phoenix Clear Insight <noreply@phoenixclearinsight.com>
+ *
+ * Deploy: supabase functions deploy send-email --project-ref kmrambclpujmnyxbfkjh
  */
 
 import { sendEmail } from '../lib/resendClient';
@@ -39,14 +41,16 @@ const dimPhases = ['See It', 'Believe It', 'Achieve It', 'Alignment', 'Readiness
 
 /* ── HTML email builder ── */
 function buildEmailHTML(data) {
-  const score = data.score ?? 0;
+  const score = Math.max(0, Math.min(100, Number(data.score) || 0));
   const archetype = archetypes[data.archetype] || archetypes.awakening;
-  const dimScores = data.dimScores || [0, 0, 0, 0, 0];
+  const dimScores = Array.isArray(data.dimScores) ? data.dimScores : [0, 0, 0, 0, 0];
+  const firstName = data.firstName || 'there';
 
   const dimensionRows = dimScores
     .map((rawScore, idx) => {
-      const pct = Math.round((rawScore / 25) * 100);
-      const scaledOf20 = Math.round((rawScore / 25) * 20);
+      const numScore = Math.max(0, Math.min(25, Number(rawScore) || 0));
+      const pct = Math.round((numScore / 25) * 100);
+      const scaledOf20 = Math.round((numScore / 25) * 20);
       const statusText = pct >= 72 ? 'Active' : pct >= 52 ? 'Developing' : 'Emerging';
       const statusBg = pct >= 72 ? '#EAF4EF' : pct >= 52 ? '#FBF8E8' : '#FAECEE';
       const statusColor = pct >= 72 ? '#2D6A4F' : pct >= 52 ? '#B08A00' : '#8B2635';
@@ -87,7 +91,7 @@ function buildEmailHTML(data) {
             <td style="padding:32px;">
 
               <!-- Greeting -->
-              <p style="font-size:16px;color:#0D1028;font-weight:600;margin:0 0 16px 0;">Dear ${data.firstName},</p>
+              <p style="font-size:16px;color:#0D1028;font-weight:600;margin:0 0 16px 0;">Dear ${firstName},</p>
               <p style="font-size:14px;color:#6B6B7B;line-height:1.65;margin:0 0 24px 0;">
                 Thank you for completing the Phoenix Clarity Assessment. This report summarizes your progress across our 5 clarity dimensions and holds a mirror to what your next developmental chapter requires.
               </p>
@@ -157,13 +161,15 @@ function buildEmailHTML(data) {
 
 function buildEmailText(data) {
   const archetype = archetypes[data.archetype] || archetypes.awakening;
+  const firstName = data.firstName || 'there';
+  const score = Math.max(0, Math.min(100, Number(data.score) || 0));
 
   return [
-    `Dear ${data.firstName},`,
+    `Dear ${firstName},`,
     '',
     'Thank you for completing the Phoenix Clarity Assessment.',
     '',
-    `Your clarity score: ${data.score ?? 0}/100`,
+    `Your clarity score: ${score}/100`,
     `Your archetype: ${archetype.name}`,
     '',
     archetype.directRead,
@@ -174,6 +180,18 @@ function buildEmailText(data) {
 
 /* ── Main email sender ── */
 export const sendAssessmentEmail = async (assessmentData) => {
+  if (!assessmentData) {
+    throw new Error('Assessment data is required.');
+  }
+
+  if (!assessmentData.email) {
+    throw new Error('Email address is required.');
+  }
+
+  if (!assessmentData.firstName) {
+    throw new Error('First name is required.');
+  }
+
   const emailHTML = buildEmailHTML(assessmentData);
   const result = await sendEmail({
     to: assessmentData.email,

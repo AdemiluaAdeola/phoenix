@@ -64,7 +64,9 @@ export function useAdminAuth() {
 
     return () => {
       isMounted = false;
-      listener?.subscription?.unsubscribe();
+      if (typeof listener?.subscription?.unsubscribe === 'function') {
+        listener.subscription.unsubscribe();
+      }
     };
   }, []);
 

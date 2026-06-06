@@ -91,6 +91,7 @@ const AssessmentCompletePage = () => {
 
   // 3. Outbound Email sending
   const [emailStatus, setEmailStatus] = useState('sending'); // 'sending' | 'success' | 'error'
+  const [emailError, setEmailError] = useState(null);
   const [showEmailPreview, setShowEmailPreview] = useState(false);
   const [resending, setResending] = useState(false);
 
@@ -101,10 +102,17 @@ const AssessmentCompletePage = () => {
     if (!data) return;
     try {
       setEmailStatus('sending');
+      setEmailError(null);
       await sendAssessmentEmail(data);
       setEmailStatus('success');
     } catch (err) {
-      console.error(err);
+      console.error('[AssessmentCompletePage] Email send failed:', {
+        error: err.message,
+        email: data.email,
+        assessmentId: data.id,
+        timestamp: new Date().toISOString(),
+      });
+      setEmailError(err.message || 'Unknown error');
       setEmailStatus('error');
     }
   };
@@ -116,11 +124,20 @@ const AssessmentCompletePage = () => {
     const send = async () => {
       try {
         setEmailStatus('sending');
+        setEmailError(null);
         await sendAssessmentEmail(data);
         if (active) setEmailStatus('success');
       } catch (err) {
-        console.error(err);
-        if (active) setEmailStatus('error');
+        console.error('[AssessmentCompletePage] Initial email send failed:', {
+          error: err.message,
+          email: data.email,
+          assessmentId: data.id,
+          timestamp: new Date().toISOString(),
+        });
+        if (active) {
+          setEmailError(err.message || 'Unknown error');
+          setEmailStatus('error');
+        }
       }
     };
     send();
@@ -200,6 +217,11 @@ const AssessmentCompletePage = () => {
               <div className="email-status-text-wrap">
                 <strong>Email Delivery Offline</strong>
                 <span>Unable to establish mail servers, but your results have been locally archived.</span>
+                {emailError && (
+                  <div className="email-error-details" style={{ fontSize: '11px', color: '#8B2635', marginTop: '8px', background: '#FAECEE', padding: '6px 10px', borderRadius: '4px', border: '1px solid rgba(139, 38, 53, 0.2)' }}>
+                    <strong>Details:</strong> {emailError}
+                  </div>
+                )}
               </div>
               <div className="email-status-actions">
                 <button className="email-preview-trigger-btn error" onClick={() => setShowEmailPreview(true)}>
@@ -317,9 +339,9 @@ const AssessmentCompletePage = () => {
             </div>
             <div className="email-envelope-info">
               <div><strong>From:</strong> Veta P. Hurst &lt;veta@phoenixclearinsight.com&gt;</div>
-              <div><strong>To:</strong> {data.firstName} {data.lastName} &lt;{data.email}&gt;</div>
+              <div><strong>To:</strong> {data.firstName || 'there'} {data.lastName || ''} &lt;{data.email || ''}&gt;</div>
               <div><strong>Subject:</strong> Your Personal Phoenix Clarity Assessment Report</div>
-              <div><strong>Date:</strong> {new Date(data.date).toLocaleString()}</div>
+              <div><strong>Date:</strong> {data.date ? new Date(data.date).toLocaleString() : new Date().toLocaleString()}</div>
             </div>
             <div className="email-modal-body">
               {/* Render the exact same HTML that gets emailed — pixel-perfect preview */}

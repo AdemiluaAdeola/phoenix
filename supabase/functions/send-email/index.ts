@@ -13,6 +13,7 @@ interface EmailRequest {
 interface ResendResponse {
   id?: string;
   error?: string;
+  message?: string;
 }
 
 serve(async (req: Request) => {
@@ -46,12 +47,15 @@ serve(async (req: Request) => {
       );
     }
 
-    // Retrieve Resend API key from environment
+    // Retrieve Resend credentials from Supabase secrets
     const resendApiKey = Deno.env.get("RESEND_API_KEY");
     if (!resendApiKey) {
       console.error("RESEND_API_KEY not configured");
       return new Response(
-        JSON.stringify({ error: "Email service not configured" }),
+        JSON.stringify({
+          error:
+            "Email service not configured. Set RESEND_API_KEY in Supabase Edge Function secrets.",
+        }),
         {
           status: 500,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -59,9 +63,13 @@ serve(async (req: Request) => {
       );
     }
 
+    const defaultFrom =
+      Deno.env.get("RESEND_FROM_EMAIL") ||
+      "Phoenix Clear Insight <onboarding@resend.dev>";
+
     // Prepare Resend API request payload
     const resendPayload = {
-      from: emailPayload.from || "noreply@yourdomain.com",
+      from: emailPayload.from || defaultFrom,
       to: emailPayload.to,
       subject: emailPayload.subject,
       html: emailPayload.html,
@@ -85,9 +93,18 @@ serve(async (req: Request) => {
     // Check for errors from Resend
     if (!resendResponse.ok) {
       console.error("Resend API error:", resendData);
+      const rawMsg =
+        resendData.message ||
+        resendData.error ||
+        "Failed to send email";
+      const hint =
+        resendResponse.status === 403 &&
+        rawMsg.includes("verify a domain")
+          ? " Verify phoenixclearinsight.com at https://resend.com/domains."
+          : "";
       return new Response(
         JSON.stringify({
-          error: resendData.error || "Failed to send email",
+          error: rawMsg + hint,
         }),
         {
           status: resendResponse.status,

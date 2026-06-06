@@ -1,4 +1,5 @@
 import { env } from '../config/env';
+import { getSupabaseClient } from './supabaseClient';
 
 const RESEND_EMAILS_URL = 'https://api.resend.com/emails';
 
@@ -87,6 +88,57 @@ export async function sendEmailWithResend({
   }
 }
 
+/**
+ * Sends email through the Supabase `send-email` edge function.
+ * Keeps the Resend API key server-side and avoids browser CORS blocks.
+ */
+export async function sendEmailViaSupabaseFunction({
+  to,
+  subject,
+  html,
+  text,
+  from = resolveFromAddress(),
+}) {
+  const { client, error: clientError } = getSupabaseClient();
+  if (!client) {
+    return {
+      data: null,
+      error: clientError || 'Supabase is not configured.',
+    };
+  }
+
+  try {
+    const { data, error: invokeError } = await client.functions.invoke('send-email', {
+      body: {
+        to: normalizeRecipients(to),
+        subject,
+        html,
+        text,
+        from,
+      },
+    });
+
+    if (invokeError) {
+      const message = invokeError.message || 'Failed to invoke email function.';
+      const hint = message.includes('Requested function was not found')
+        ? ' Deploy the send-email Supabase function and set RESEND_API_KEY as a secret.'
+        : '';
+      return { data: null, error: message + hint };
+    }
+
+    if (data?.error) {
+      return { data: null, error: data.error };
+    }
+
+    return { data, error: null };
+  } catch (error) {
+    return {
+      data: null,
+      error: getErrorMessage(error, 'Unable to send email — network error.'),
+    };
+  }
+}
+
 export async function sendEmailViaApi({ to, subject, html, text, signal }) {
   if (!env.emailApiUrl) {
     return {
@@ -126,15 +178,29 @@ export async function sendEmailViaApi({ to, subject, html, text, signal }) {
 
 /**
  * Unified send function.
- * Routes through VITE_EMAIL_API_URL (server-side proxy) when set,
- * otherwise calls Resend directly from the browser.
  *
- * For production: set VITE_EMAIL_API_URL to keep your Resend key server-side.
- * For MVP/early launch: direct browser call is acceptable.
+ * Priority:
+ *  1. VITE_EMAIL_API_URL — custom backend proxy (e.g. /api/send-email in dev)
+ *  2. Supabase `send-email` edge function — recommended for production
+ *  3. Direct Resend from browser — local dev fallback only
  */
 export async function sendEmail(payload) {
   if (env.emailApiUrl) {
     return sendEmailViaApi(payload);
   }
-  return sendEmailWithResend(payload);
+
+  const { client } = getSupabaseClient();
+  if (client) {
+    return sendEmailViaSupabaseFunction(payload);
+  }
+
+  if (import.meta.env.DEV && env.resendApiKey) {
+    return sendEmailWithResend(payload);
+  }
+
+  return {
+    data: null,
+    error:
+      'Email is not configured. Deploy the Supabase send-email function and set RESEND_API_KEY as a secret.',
+  };
 }

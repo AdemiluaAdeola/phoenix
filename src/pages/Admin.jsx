@@ -14,12 +14,28 @@ export default function Admin() {
   const [authenticated, setAuthenticated] = useState(() => localStorage.getItem('coachAuth') === 'true')
   const [password, setPassword] = useState('')
   const [authError, setAuthError] = useState('')
+  const [dbError, setDbError] = useState('')
 
   useEffect(() => {
     let mounted = true
-    db.assessments.toArray().then((all) => {
-      if (mounted) setItems(all.reverse())
-    })
+    const loadAssessments = async () => {
+      try {
+        if (!db || !db.assessments) {
+          throw new Error('Database not initialized')
+        }
+        const all = await db.assessments.toArray()
+        if (mounted) {
+          setItems(all.reverse())
+          setDbError('')
+        }
+      } catch (err) {
+        if (mounted) {
+          console.error('Failed to load assessments from IndexedDB:', err)
+          setDbError('Failed to load assessments. Please refresh the page.')
+        }
+      }
+    }
+    loadAssessments()
     return () => {
       mounted = false
     }
@@ -103,6 +119,11 @@ export default function Admin() {
           </div>
         ) : (
           <div className="admin-panel">
+            {dbError && (
+              <div className="form-error" role="alert" style={{ marginBottom: '20px' }}>
+                <strong>Database Error:</strong> {dbError}
+              </div>
+            )}
             <div className="admin-summary">
               <div className="admin-summary-card">
                 <h3>Total visible submissions</h3>

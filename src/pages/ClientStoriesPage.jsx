@@ -4,14 +4,17 @@ import './ClientStoriesPage.css';
 
 const ClientStoriesPage = () => {
   const [stories, setStories] = useState([]);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const loadStories = async () => {
       try {
         const approved = await listTestimonials({ status: 'Approved' });
         setStories(approved);
+        setError(null);
       } catch (err) {
         console.error('Failed to load testimonials from Supabase:', err);
+        setError(err.message || 'Failed to load client stories. Please try again later.');
       }
     };
     loadStories();
@@ -27,6 +30,12 @@ const ClientStoriesPage = () => {
       </div>
 
       <div className="container stories-container">
+
+      {error && (
+        <div className="card error-message" style={{ background: '#FAECEE', borderLeft: '4px solid #8B2635', color: '#8B2635' }} role="alert">
+          <strong>Unable to load stories:</strong> {error}
+        </div>
+      )}
 
       <div className="stories-list">
         {stories.length === 0 ? (

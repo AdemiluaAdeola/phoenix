@@ -81,7 +81,8 @@ const LoginPage = () => {
               type="submit"
               className="btn btn-primary scale-on-hover"
               style={{ width: '100%', marginTop: '10px' }}
-              disabled={isSubmitting}
+              disabled={isSubmitting || !email || !password}
+              aria-busy={isSubmitting}
             >
               {isSubmitting ? 'Signing In...' : 'Sign In →'}
             </button>

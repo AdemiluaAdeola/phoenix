@@ -30,7 +30,6 @@ async function debugInsert({ tableName, row, error, fallbackMessage }) {
     hint: error?.hint,
   };
 
-  // eslint-disable-next-line no-console
   console.error('[supabaseRestClient] Insert failed', {
     tableName,
     row,
@@ -185,7 +184,10 @@ export async function createAssessment(payload) {
   let { data, error } = await insertAssessment(assessmentRow(payload));
 
   if (isMissingColumnError(error, 'dim_scores')) {
-    console.warn('Supabase assessments table is missing dim_scores. Retrying assessment insert without that optional column.');
+    console.warn('[supabaseRestClient] Supabase assessments table is missing dim_scores column. Retrying assessment insert without optional dimension scores.', {
+      originalError: error?.message,
+      timestamp: new Date().toISOString(),
+    });
     ({ data, error } = await insertAssessment(assessmentRow(payload, { includeDimScores: false })));
   }
 
