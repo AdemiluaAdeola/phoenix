@@ -177,7 +177,7 @@ async function main() {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({
-      from: FROM_EMAIL,
+      from: 'onboarding@resend.dev', // temp: bypasses domain verification
       to: [TO_EMAIL],
       subject: '[TEST] Your Personal Phoenix Clarity Assessment Report',
       html: buildEmailHTML(mockData),

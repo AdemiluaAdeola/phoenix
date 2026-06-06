@@ -1,9 +1,5 @@
-import Dexie from 'dexie'
-
-const db = new Dexie('ClarityDB')
-
-db.version(1).stores({
-  assessments: '++id, email, score, createdAt'
-})
-
-export default db
+/**
+ * Legacy Dexie stub — kept for import compatibility only.
+ * All persistence is now handled by Supabase (see src/api/supabaseRestClient.js).
+ */
+export default null;
