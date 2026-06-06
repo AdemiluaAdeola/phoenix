@@ -37,8 +37,9 @@ export function validateClientEnv() {
   };
 
   const emptyExplicit = Object.entries(tableVars)
-    .filter(([_, v]) => v !== undefined && String(v).trim() === '')
+    .filter(([, v]) => v !== undefined && String(v).trim() === '')
     .map(([k]) => k);
+
 
   if (emptyExplicit.length > 0) {
     return {
