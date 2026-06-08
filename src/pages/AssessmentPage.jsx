@@ -107,6 +107,7 @@ const AssessmentPage = () => {
   const [searchParams] = useSearchParams();
   const mode = searchParams.get('mode');
   const share = searchParams.get('share');
+  const assessment = searchParams.get('assessment'); // readiness | execution
 
   const [activeTab, setActiveTab] = useState(() => {
     if (mode === 'coach') return 'readiness';
@@ -129,34 +130,39 @@ const AssessmentPage = () => {
   };
 
   if (mode === 'coach' && !isUnlocked) {
+    const lockedTitle =
+      assessment === 'execution' ? 'Execution Assessment' : 'Readiness Assessment';
+
     return (
       <div className="coach-lock-overlay">
         <form onSubmit={handlePasswordSubmit} className="coach-lock-card hover-glow">
-          <h3>Coach Access</h3>
-          <p>Please enter the authorization code to unlock readiness and execution assessments.</p>
-
-          <div className="coach-lock-actions-top">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => navigate('/')}
-              style={{ width: '100%' }}
-            >
-              ← Back to Landing
-            </button>
-          </div>
+          <h3>{lockedTitle}</h3>
+          <p>Please enter the authorization code to unlock this assessment.</p>
 
           <div className="form-group">
-            <input 
-              type="password" 
-              placeholder="Enter access code" 
+            <input
+              type="password"
+              placeholder="Enter access code"
               value={passwordInput}
-              onChange={e => setPasswordInput(e.target.value)}
+              onChange={(e) => setPasswordInput(e.target.value)}
               required
             />
           </div>
+
           {passwordError && <div className="coach-lock-error">Incorrect code. Try again.</div>}
-          <button type="submit" className="btn btn-primary scale-on-hover" style={{ width: '100%' }}>Unlock Dashboard</button>
+
+          <button type="submit" className="btn btn-primary scale-on-hover" style={{ width: '100%' }}>
+            Unlock Assessment
+          </button>
+
+          <div style={{ marginTop: 14, textAlign: 'center', color: 'var(--muted)', fontSize: '0.9rem' }}>
+            <span>Don't have an access code? </span>
+            <Link to="/assessment" style={{ color: 'var(--link)' }}>
+              Take a free assessment
+            </Link>
+            <span> or </span>
+            <a href="" style={{ color: 'var(--link)' }}>GET ACCESS</a>
+          </div>
         </form>
       </div>
     );

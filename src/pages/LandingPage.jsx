@@ -25,7 +25,6 @@ const platformCards = [
     body: 'A progress check for follow-through, aligned action, resilience, and the client’s ability to sustain momentum.',
     to: '/assessment?mode=coach',
     action: 'Open Dashboard'
-  }
 ];
 
 const LandingPage = () => {
@@ -35,10 +34,10 @@ const LandingPage = () => {
         <Link className="tab-btn active" to="/assessment">
           Clarity assessment <span className="tab-badge">Free</span>
         </Link>
-        <Link className="tab-btn" to="/assessment?mode=coach">
+        <Link className="tab-btn" to="/assessment?mode=coach&assessment=readiness">
           readiness assessment <span className="tab-badge">Coach</span>
         </Link>
-        <Link className="tab-btn" to="/assessment?mode=coach">
+        <Link className="tab-btn" to="/assessment?mode=coach&assessment=execution">
           execution assessment <span className="tab-badge">Week 3</span>
         </Link>
         <Link className="tab-btn" to="/assessment?share=story">
@@ -90,7 +89,7 @@ const LandingPage = () => {
         <div className="landing-callout">
           <div>
             <span>Client Stories</span>
-            <h2>Capture transformation in the client’s own words.</h2>
+            <h2>s2hare your transformation story</h2>
             <p>Use the story form after a program or breakthrough moment so testimonials can be reviewed before publishing.</p>
           </div>
           <Link to="/assessment?share=story" className="btn btn-primary">Share a Story</Link>
