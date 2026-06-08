@@ -12,19 +12,19 @@ const platformCards = [
   },
   {
     title: 'Readiness Assessment',
-    badge: 'Coach',
+    badge: 'Premium',
     phase: 'Believe It',
     body: 'An internal coach evaluation for identity confidence, emotional capacity, and commitment before deeper transformation work.',
-    to: '/assessment?mode=coach',
-    action: 'Coach Access'
+    to: '/assessment?mode=coach&assessment=readiness',
+    action: 'Begin Assessment'
   },
   {
     title: 'Execution Assessment',
     badge: 'Week 3',
     phase: 'Achieve It',
     body: 'A progress check for follow-through, aligned action, resilience, and the client’s ability to sustain momentum.',
-    to: '/assessment?mode=coach',
-    action: 'Open Dashboard'
+    to: '/assessment?mode=coach&assessment=execution',
+    action: 'Begin Assessment'
   }
 ];
 
@@ -36,7 +36,7 @@ const LandingPage = () => {
           Clarity assessment <span className="tab-badge">Free</span>
         </Link>
         <Link className="tab-btn" to="/assessment?mode=coach">
-          readiness assessment <span className="tab-badge">Coach</span>
+          readiness assessment <span className="tab-badge">Premium</span>
         </Link>
         <Link className="tab-btn" to="/assessment?mode=coach">
           execution assessment <span className="tab-badge">Week 3</span>
@@ -60,7 +60,7 @@ const LandingPage = () => {
         </div>
         <div className="landing-hero-actions">
           <Link to="/assessment" className="btn btn-gold">Begin My Clarity Assessment →</Link>
-          <Link to="/blog" className="btn btn-secondary">Read the Phoenix Blog</Link>
+          <Link to="https://www.phoenixclearinsight.com/" className="btn btn-secondary">Visit Our Website</Link>
         </div>
       </section>
 
@@ -90,10 +90,10 @@ const LandingPage = () => {
         <div className="landing-callout">
           <div>
             <span>Client Stories</span>
-            <h2>Capture transformation in the client’s own words.</h2>
+            <h2>Share your transformation story.</h2>
             <p>Use the story form after a program or breakthrough moment so testimonials can be reviewed before publishing.</p>
           </div>
-          <Link to="/assessment?share=story" className="btn btn-primary">Share a Story</Link>
+          <Link to="/assessment?share=story" className="btn btn-primary">Share Your Story</Link>
         </div>
       </section>
     </div>

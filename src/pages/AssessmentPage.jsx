@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { createAssessment, createReadiness, createExecutionForm, createTestimonial } from '../api/dbClient';
 import './AssessmentPage.css';
 
@@ -107,9 +107,10 @@ const AssessmentPage = () => {
   const [searchParams] = useSearchParams();
   const mode = searchParams.get('mode');
   const share = searchParams.get('share');
+  const assessmentType = searchParams.get('assessment') || 'readiness';
 
   const [activeTab, setActiveTab] = useState(() => {
-    if (mode === 'coach') return 'readiness';
+    if (mode === 'coach') return assessmentType === 'execution' ? 'execution' : 'readiness';
     if (share === 'story') return 'testimonial';
     return 'clarity';
   });
@@ -128,23 +129,16 @@ const AssessmentPage = () => {
     }
   };
 
+  const getAssessmentTitle = (type) => {
+    return type === 'execution' ? 'Execution Assessment' : 'Readiness Assessment';
+  };
+
   if (mode === 'coach' && !isUnlocked) {
     return (
       <div className="coach-lock-overlay">
         <form onSubmit={handlePasswordSubmit} className="coach-lock-card hover-glow">
-          <h3>Coach Access</h3>
-          <p>Please enter the authorization code to unlock readiness and execution assessments.</p>
-
-          <div className="coach-lock-actions-top">
-            <button
-              type="button"
-              className="btn btn-secondary"
-              onClick={() => navigate('/')}
-              style={{ width: '100%' }}
-            >
-              ← Back to Landing
-            </button>
-          </div>
+          <h3>{getAssessmentTitle(assessmentType)}</h3>
+          <p>Please enter the authorization code to unlock this assessment.</p>
 
           <div className="form-group">
             <input 
@@ -156,7 +150,15 @@ const AssessmentPage = () => {
             />
           </div>
           {passwordError && <div className="coach-lock-error">Incorrect code. Try again.</div>}
-          <button type="submit" className="btn btn-primary scale-on-hover" style={{ width: '100%' }}>Unlock Dashboard</button>
+          <button type="submit" className="btn btn-primary scale-on-hover" style={{ width: '100%' }}>Unlock Assessment</button>
+          <div className="coach-lock-footer">
+            <p>Don't have an access code?</p>
+            <div className="coach-lock-footer-links">
+              <Link to="/assessment">Take a free assessment</Link>
+              <span>or</span>
+              <Link to="/login">GET ACCESS</Link>
+            </div>
+          </div>
         </form>
       </div>
     );
