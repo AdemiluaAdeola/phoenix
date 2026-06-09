@@ -1,6 +1,7 @@
 import { useLocation, Link } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
 import { sendAssessmentEmail, buildEmailHTML } from '../utils/emailService';
+import { subscribeToConvertKit } from '../lib/convertKitClient';
 import './AssessmentCompletePage.css';
 
 const dimFullNames = ['Strengths & Skills', 'Values & What Matters', 'Patterns & Blocks', 'Direction & Opportunity', 'Alignment & Confidence'];
@@ -92,8 +93,30 @@ const AssessmentCompletePage = () => {
   // 3. Outbound Email sending
   const [emailStatus, setEmailStatus] = useState('sending'); // 'sending' | 'success' | 'error'
   const [emailError, setEmailError] = useState(null);
+  const [convertKitStatus, setConvertKitStatus] = useState('idle'); // 'idle' | 'sending' | 'success' | 'error'
+  const [convertKitError, setConvertKitError] = useState(null);
   const [showEmailPreview, setShowEmailPreview] = useState(false);
   const [resending, setResending] = useState(false);
+
+  const triggerConvertKitSubscription = async () => {
+    if (!data?.email) return;
+
+    setConvertKitStatus('sending');
+    setConvertKitError(null);
+
+    const result = await subscribeToConvertKit({
+      email: data.email,
+      firstName: data.firstName || '',
+    });
+
+    if (result.error) {
+      setConvertKitStatus('error');
+      setConvertKitError(result.error);
+      console.warn('[ConvertKit] subscription failed:', result.error);
+    } else {
+      setConvertKitStatus('success');
+    }
+  };
 
   // Pre-build the email HTML once for the preview iframe
   const emailPreviewHTML = useMemo(() => (data ? buildEmailHTML(data) : ''), [data]);
@@ -105,6 +128,7 @@ const AssessmentCompletePage = () => {
       setEmailError(null);
       await sendAssessmentEmail(data);
       setEmailStatus('success');
+      await triggerConvertKitSubscription();
     } catch (err) {
       console.error('[AssessmentCompletePage] Email send failed:', {
         error: err.message,
@@ -126,7 +150,10 @@ const AssessmentCompletePage = () => {
         setEmailStatus('sending');
         setEmailError(null);
         await sendAssessmentEmail(data);
-        if (active) setEmailStatus('success');
+        if (active) {
+          setEmailStatus('success');
+          await triggerConvertKitSubscription();
+        }
       } catch (err) {
         console.error('[AssessmentCompletePage] Initial email send failed:', {
           error: err.message,
@@ -238,6 +265,15 @@ const AssessmentCompletePage = () => {
             </div>
           )}
         </div>
+
+        {convertKitStatus !== 'idle' && (
+          <div className={`convertkit-status-card convertkit-${convertKitStatus}`} style={{ marginTop: 16, padding: '14px 18px', borderRadius: 12, background: convertKitStatus === 'error' ? '#FAECEE' : '#EFF6FF', color: convertKitStatus === 'error' ? '#8B2635' : '#0D1028' }}>
+            <strong>ConvertKit automation</strong>{' '}
+            {convertKitStatus === 'sending' && '— Subscribing this contact to your automation workflow...'}
+            {convertKitStatus === 'success' && '— Contact successfully added to ConvertKit automation.'}
+            {convertKitStatus === 'error' && `— Subscription failed: ${convertKitError || 'Unknown error'}`}
+          </div>
+        )}
 
         <div className="r2-section">
           <div className="r2-section-header">

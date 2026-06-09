@@ -14,6 +14,9 @@ export const env = {
   resendApiKey: viteEnv.VITE_RESEND_API_KEY || '',
   resendFromEmail: viteEnv.VITE_RESEND_FROM_EMAIL || '',
   emailApiUrl: viteEnv.VITE_EMAIL_API_URL || '',
+  convertKitApiKey: viteEnv.VITE_CONVERTKIT_API_KEY || '',
+  convertKitFormId: viteEnv.VITE_CONVERTKIT_FORM_ID || '',
+  convertKitTagId: viteEnv.VITE_CONVERTKIT_TAG_ID || '',
 };
 
 export function validateClientEnv() {
