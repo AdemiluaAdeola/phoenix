@@ -14,7 +14,7 @@ function normalizeConvertKitPayload({ email, firstName }) {
   return payload;
 }
 
-export async function subscribeToConvertKit({ email, firstName }) {
+export async function subscribeToConvertKit({ email, firstName, archetype }) {
   if (!email) {
     return { data: null, error: 'Email is required for ConvertKit subscription.' };
   }
@@ -26,6 +26,7 @@ export async function subscribeToConvertKit({ email, firstName }) {
         body: {
           email,
           first_name: firstName || '',
+          archetype: archetype || undefined,
           form_id: env.convertKitFormId || undefined,
           tag_id: env.convertKitTagId || undefined,
         },

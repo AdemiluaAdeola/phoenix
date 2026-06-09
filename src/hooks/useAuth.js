@@ -3,27 +3,7 @@ import { getSupabaseClient } from '../lib/supabaseClient';
 
 const supabaseStatus = getSupabaseClient();
 
-function includesAdminRole(value) {
-  if (!value) return false;
-  if (Array.isArray(value)) return value.includes('admin');
-  return value === 'admin';
-}
-
-export function hasAdminRole(user) {
-  if (!user) return false;
-
-  const appMetadata = user.app_metadata || {};
-  const userMetadata = user.user_metadata || {};
-
-  return (
-    includesAdminRole(appMetadata.role) ||
-    includesAdminRole(appMetadata.roles) ||
-    includesAdminRole(userMetadata.role) ||
-    includesAdminRole(userMetadata.roles)
-  );
-}
-
-export function useAdminAuth() {
+export function useAuth() {
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(() => !supabaseStatus.error);
   const [error, setError] = useState(() => supabaseStatus.error || '');
@@ -47,7 +27,7 @@ export function useAdminAuth() {
 
       if (authError) {
         setUser(null);
-        setError(authError.message || 'Unable to verify admin access.');
+        setError(authError.message || 'Unable to verify user access.');
       } else {
         setUser(data?.user || null);
       }
@@ -70,11 +50,8 @@ export function useAdminAuth() {
     };
   }, []);
 
-  const isAdmin = useMemo(() => hasAdminRole(user), [user]);
-
   return {
     user,
-    isAdmin,
     isAuthenticated: Boolean(user),
     isLoading,
     error,

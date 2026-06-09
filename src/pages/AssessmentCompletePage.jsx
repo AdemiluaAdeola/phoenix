@@ -107,6 +107,7 @@ const AssessmentCompletePage = () => {
     const result = await subscribeToConvertKit({
       email: data.email,
       firstName: data.firstName || '',
+      archetype: data.archetype || 'awakening',
     });
 
     if (result.error) {

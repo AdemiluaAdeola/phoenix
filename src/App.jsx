@@ -1,12 +1,12 @@
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/Layout';
-import AdminRoute from './components/AdminRoute';
+import ProtectedRoute from './components/ProtectedRoute';
 import LandingPage from './pages/LandingPage';
 import AssessmentPage from './pages/AssessmentPage';
 import AssessmentCompletePage from './pages/AssessmentCompletePage';
 import BlogPage from './pages/BlogPage';
 import LoginPage from './pages/LoginPage';
-import AdminDashboard from './pages/AdminDashboard';
+import Dashboard from './pages/Dashboard';
 import ClientStoriesPage from './pages/ClientStoriesPage';
 
 function App() {
@@ -20,11 +20,11 @@ function App() {
         <Route path="/client-stories" element={<ClientStoriesPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route
-          path="/admin"
+          path="/dashboard"
           element={(
-            <AdminRoute>
-              <AdminDashboard />
-            </AdminRoute>
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
           )}
         />
       </Routes>

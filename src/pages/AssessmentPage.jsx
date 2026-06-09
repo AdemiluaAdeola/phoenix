@@ -363,8 +363,8 @@ const ClarityAssessment = ({ navigate }) => {
         <h1>The Phoenix<br /><em>Clarity Assessment</em></h1>
         <p>25 questions. 7 minutes. A clear picture of where you are—and what your next chapter actually requires.</p>
         <div className="hero-meta">
-          <span><span className="dot"></span>25 Questions </span>&nbsp;
-          <span><span className="dot"></span> 5 Dimensions </span>&nbsp;
+          <span><span className="dot"></span>25 Questions. </span>
+          <span><span className="dot"></span> 5 Dimensions. </span>
           <span><span className="dot"></span> Free · No obligation</span>
         </div>
       </div>

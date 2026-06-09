@@ -35,7 +35,7 @@ const LoginPage = () => {
       return;
     }
 
-    const destination = location.state?.from?.pathname || '/admin';
+    const destination = location.state?.from?.pathname || '/dashboard';
     navigate(destination, { replace: true });
     setIsSubmitting(false);
   };
@@ -44,7 +44,7 @@ const LoginPage = () => {
     <div className="animate-fade-slide">
       <div className="hero">
         <div className="hero-label">Secured Access</div>
-        <h1>Admin <em>Portal</em></h1>
+        <h1>Coach <em>Portal</em></h1>
         <p>Sign in to access the Phoenix Coach Console, review assessments, and manage client stories.</p>
       </div>
 
@@ -89,7 +89,7 @@ const LoginPage = () => {
           </form>
 
           <div className="login-card-footer">
-            Secured Access for Phoenix Admin Personnel Only.
+            Secured Access for Authorized Users.
           </div>
         </div>
       </div>

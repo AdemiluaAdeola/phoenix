@@ -4,8 +4,15 @@ import { corsHeaders } from '../_shared/cors.ts';
 interface ConvertKitRequest {
   email: string;
   first_name?: string;
+  archetype?: 'phoenix_momentum' | 'dreaming' | 'awakening';
   form_id?: string;
   tag_id?: string;
+}
+
+interface ArchetypeTagMapping {
+  phoenix_momentum: string;
+  dreaming: string;
+  awakening: string;
 }
 
 serve(async (req: Request) => {
@@ -50,12 +57,31 @@ serve(async (req: Request) => {
     );
   }
 
-  const tagId = body.tag_id || Deno.env.get('CONVERTKIT_TAG_ID');
+  // Get archetype-specific tag IDs from environment
+  const archetypeTagMapping: ArchetypeTagMapping = {
+    phoenix_momentum: Deno.env.get('CONVERTKIT_TAG_MOMENTUM') || '',
+    dreaming: Deno.env.get('CONVERTKIT_TAG_DREAMING') || '',
+    awakening: Deno.env.get('CONVERTKIT_TAG_AWAKENING') || '',
+  };
+
+  // Determine which tag to use
+  let selectedTagId = body.tag_id;
+
+  // If archetype is provided, use the corresponding tag
+  if (body.archetype && archetypeTagMapping[body.archetype]) {
+    selectedTagId = archetypeTagMapping[body.archetype];
+  } else if (!selectedTagId) {
+    // Fall back to default tag or form
+    selectedTagId = Deno.env.get('CONVERTKIT_TAG_ID') || undefined;
+  }
+
   const formId = body.form_id || Deno.env.get('CONVERTKIT_FORM_ID');
 
-  if (!tagId && !formId) {
+  if (!selectedTagId && !formId) {
     return new Response(
-      JSON.stringify({ error: 'ConvertKit tag or form is not configured. Set CONVERTKIT_TAG_ID or CONVERTKIT_FORM_ID.' }),
+      JSON.stringify({
+        error: 'ConvertKit tag or form is not configured. Set CONVERTKIT_TAG_ID, CONVERTKIT_TAG_MOMENTUM, CONVERTKIT_TAG_DREAMING, CONVERTKIT_TAG_AWAKENING, or CONVERTKIT_FORM_ID.',
+      }),
       {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -63,8 +89,8 @@ serve(async (req: Request) => {
     );
   }
 
-  const endpoint = tagId
-    ? `https://api.convertkit.com/v3/tags/${tagId}/subscribe`
+  const endpoint = selectedTagId
+    ? `https://api.convertkit.com/v3/tags/${selectedTagId}/subscribe`
     : `https://api.convertkit.com/v3/forms/${formId}/subscribe`;
 
   const payload = {
@@ -83,14 +109,15 @@ serve(async (req: Request) => {
     const data = await response.json().catch(() => null);
 
     if (!response.ok) {
-      console.error('ConvertKit API error', { status: response.status, data });
+      console.error('ConvertKit API error', { status: response.status, data, email, selectedTagId });
       return new Response(JSON.stringify({ error: data?.message || data?.error || 'ConvertKit request failed.' }), {
         status: response.status,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    return new Response(JSON.stringify({ success: true, data }), {
+    console.log('ConvertKit subscription success', { email, archetype: body.archetype, tagId: selectedTagId });
+    return new Response(JSON.stringify({ success: true, data, tagId: selectedTagId }), {
       status: 200,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });

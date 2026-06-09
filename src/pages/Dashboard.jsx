@@ -11,7 +11,7 @@ import {
 } from '../api/dbClient';
 import { getSupabaseClient } from '../lib/supabaseClient';
 import { downloadCsv } from '../utils/csvExport';
-import './AdminDashboard.css';
+import './Dashboard.css';
 
 const tableByTab = {
   clarity: env.supabaseAssessmentsTable,
@@ -20,7 +20,7 @@ const tableByTab = {
   testimonials: env.supabaseTestimonialsTable,
 };
 
-const AdminDashboard = () => {
+const Dashboard = () => {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('clarity');
   const [data, setData] = useState([]);
@@ -165,7 +165,7 @@ const AdminDashboard = () => {
     <div className="animate-fade-slide">
       <div className="hero">
         <div className="hero-label">Phoenix Coach Console</div>
-        <h1>Admin <em>Dashboard</em></h1>
+        <h1><em>Dashboard</em></h1>
         <p>Review assessment records, export client data, and manage stories from one focused workspace.</p>
         <div className="admin-actions" style={{ marginTop: '12px' }}>
           <button onClick={exportAllRowsToCsv} className="btn btn-gold" disabled={isExporting}>
@@ -287,4 +287,4 @@ const AdminDashboard = () => {
   );
 };
 
-export default AdminDashboard;
+export default Dashboard;
