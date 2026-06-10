@@ -98,84 +98,112 @@ const AssessmentCompletePage = () => {
   const [showEmailPreview, setShowEmailPreview] = useState(false);
   const [resending, setResending] = useState(false);
 
-  const triggerConvertKitSubscription = async () => {
-    if (!data?.email) return;
-
-    setConvertKitStatus('sending');
-    setConvertKitError(null);
-
-    const result = await subscribeToConvertKit({
-      email: data.email,
-      firstName: data.firstName || '',
-      archetype: data.archetype || 'awakening',
-    });
-
-    if (result.error) {
-      setConvertKitStatus('error');
-      setConvertKitError(result.error);
-      console.warn('[ConvertKit] subscription failed:', result.error);
-    } else {
-      setConvertKitStatus('success');
-    }
-  };
-
   // Pre-build the email HTML once for the preview iframe
   const emailPreviewHTML = useMemo(() => (data ? buildEmailHTML(data) : ''), [data]);
 
-  const triggerEmailSend = async () => {
+  const triggerOutboundDelivery = async () => {
     if (!data) return;
-    try {
-      setEmailStatus('sending');
-      setEmailError(null);
-      await sendAssessmentEmail(data);
+
+    setEmailStatus('sending');
+    setEmailError(null);
+    setConvertKitStatus('sending');
+    setConvertKitError(null);
+
+    const [emailResult, convertKitResult] = await Promise.allSettled([
+      sendAssessmentEmail(data),
+      subscribeToConvertKit({
+        email: data.email,
+        firstName: data.firstName || '',
+        archetype: data.archetype || 'awakening',
+      }),
+    ]);
+
+    if (emailResult.status === 'fulfilled') {
       setEmailStatus('success');
-      await triggerConvertKitSubscription();
-    } catch (err) {
+    } else {
       console.error('[AssessmentCompletePage] Email send failed:', {
-        error: err.message,
+        error: emailResult.reason?.message,
         email: data.email,
         assessmentId: data.id,
         timestamp: new Date().toISOString(),
       });
-      setEmailError(err.message || 'Unknown error');
+      setEmailError(emailResult.reason?.message || 'Unknown error');
       setEmailStatus('error');
+    }
+
+    if (convertKitResult.status === 'fulfilled' && !convertKitResult.value?.error) {
+      setConvertKitStatus('success');
+    } else {
+      const convertKitFailure =
+        convertKitResult.status === 'rejected'
+          ? convertKitResult.reason?.message
+          : convertKitResult.value?.error;
+
+      console.warn('[ConvertKit] subscription failed:', convertKitFailure);
+      setConvertKitError(convertKitFailure || 'Unknown error');
+      setConvertKitStatus('error');
     }
   };
 
   // Send on first mount
   useEffect(() => {
     if (!data) return undefined;
-    let active = true;
+    let cancelled = false;
+
     const send = async () => {
-      try {
-        setEmailStatus('sending');
-        setEmailError(null);
-        await sendAssessmentEmail(data);
-        if (active) {
-          setEmailStatus('success');
-          await triggerConvertKitSubscription();
-        }
-      } catch (err) {
+      setEmailStatus('sending');
+      setEmailError(null);
+      setConvertKitStatus('sending');
+      setConvertKitError(null);
+
+      const [emailResult, convertKitResult] = await Promise.allSettled([
+        sendAssessmentEmail(data),
+        subscribeToConvertKit({
+          email: data.email,
+          firstName: data.firstName || '',
+          archetype: data.archetype || 'awakening',
+        }),
+      ]);
+
+      if (cancelled) {
+        return;
+      }
+
+      if (emailResult.status === 'fulfilled') {
+        setEmailStatus('success');
+      } else {
         console.error('[AssessmentCompletePage] Initial email send failed:', {
-          error: err.message,
+          error: emailResult.reason?.message,
           email: data.email,
           assessmentId: data.id,
           timestamp: new Date().toISOString(),
         });
-        if (active) {
-          setEmailError(err.message || 'Unknown error');
-          setEmailStatus('error');
-        }
+        setEmailError(emailResult.reason?.message || 'Unknown error');
+        setEmailStatus('error');
+      }
+
+      if (convertKitResult.status === 'fulfilled' && !convertKitResult.value?.error) {
+        setConvertKitStatus('success');
+      } else {
+        const convertKitFailure =
+          convertKitResult.status === 'rejected'
+            ? convertKitResult.reason?.message
+            : convertKitResult.value?.error;
+
+        console.warn('[ConvertKit] subscription failed:', convertKitFailure);
+        setConvertKitError(convertKitFailure || 'Unknown error');
+        setConvertKitStatus('error');
       }
     };
+
     send();
-    return () => { active = false; };
+    return () => { cancelled = true; };
   }, [data]);
 
   const handleResend = async () => {
     setResending(true);
     try {
-      await triggerEmailSend();
+      await triggerOutboundDelivery();
     } finally {
       setResending(false);
     }
