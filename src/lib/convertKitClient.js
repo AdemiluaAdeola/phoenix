@@ -14,44 +14,7 @@ function normalizeConvertKitPayload({ email, firstName }) {
   return payload;
 }
 
-export async function subscribeToConvertKit({ email, firstName, archetype }) {
-  if (!email) {
-    return { data: null, error: 'Email is required for ConvertKit subscription.' };
-  }
-
-  const { client, error: clientError } = getSupabaseClient();
-  if (client) {
-    try {
-      const { data, error: invokeError } = await client.functions.invoke('convertkit-subscribe', {
-        body: {
-          email,
-          first_name: firstName || '',
-          archetype: archetype || undefined,
-          form_id: env.convertKitFormId || undefined,
-          tag_id: env.convertKitTagId || undefined,
-        },
-      });
-
-      if (invokeError) {
-        return {
-          data: null,
-          error: invokeError.message || 'Failed to invoke ConvertKit subscription function.',
-        };
-      }
-
-      if (data?.error) {
-        return { data: null, error: data.error };
-      }
-
-      return { data, error: null };
-    } catch (error) {
-      return {
-        data: null,
-        error: error instanceof Error ? error.message : 'Unable to subscribe to ConvertKit via Supabase.',
-      };
-    }
-  }
-
+async function subscribeToConvertKitDirect({ email, firstName }) {
   if (!env.convertKitApiKey) {
     return {
       data: null,
@@ -100,4 +63,57 @@ export async function subscribeToConvertKit({ email, firstName, archetype }) {
       error: err instanceof Error ? err.message : 'Failed to subscribe via ConvertKit.',
     };
   }
+}
+
+export async function subscribeToConvertKit({ email, firstName, archetype }) {
+  if (!email) {
+    return { data: null, error: 'Email is required for ConvertKit subscription.' };
+  }
+
+  const { client } = getSupabaseClient();
+  if (client) {
+    try {
+      const { data, error: invokeError } = await client.functions.invoke('convertkit-subscribe', {
+        body: {
+          email,
+          first_name: firstName || '',
+          archetype: archetype || undefined,
+          form_id: env.convertKitFormId || undefined,
+          tag_id: env.convertKitTagId || undefined,
+        },
+      });
+
+      if (!invokeError && !data?.error) {
+        return { data, error: null };
+      }
+
+      const fallback = await subscribeToConvertKitDirect({ email, firstName });
+      if (!fallback.error) {
+        return fallback;
+      }
+
+      return {
+        data: null,
+        error:
+          data?.error ||
+          invokeError?.message ||
+          fallback.error ||
+          'Failed to invoke ConvertKit subscription function.',
+      };
+    } catch (error) {
+      const fallback = await subscribeToConvertKitDirect({ email, firstName });
+      if (!fallback.error) {
+        return fallback;
+      }
+
+      return {
+        data: null,
+        error:
+          (error instanceof Error ? error.message : 'Unable to subscribe to ConvertKit via Supabase.') +
+          ` Fallback also failed: ${fallback.error}`,
+      };
+    }
+  }
+
+  return subscribeToConvertKitDirect({ email, firstName });
 }
