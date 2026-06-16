@@ -9,5 +9,9 @@ export {
   createReadiness,
   listReadiness,
   createExecutionForm,
-  listExecutionForms
+  listExecutionForms,
+  deleteTestimonial,
+  deleteAssessment,
+  deleteReadiness,
+  deleteExecutionForm
 } from './supabaseRestClient';

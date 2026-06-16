@@ -368,4 +368,40 @@ export async function listExecutionForms() {
 
   handleSupabaseError(error, 'Failed to load execution records.');
   return (data || []).map(mapExecutionForm);
+
+
+// Delete helper functions
+export async function deleteRow(tableName, id) {
+  if (!tableName) {
+    throw new Error('Missing table name for delete operation.');
+  }
+  if (!id) {
+    throw new Error('Missing id for delete operation.');
+  }
+  const supabase = assertSupabaseClient();
+  const { data, error } = await supabase
+    .from(tableName)
+    .delete()
+    .eq('id', id)
+    .single();
+  handleSupabaseError(error, `Failed to delete row from ${tableName}.`);
+  return data;
 }
+
+export async function deleteTestimonial(id) {
+  return deleteRow(env.supabaseTestimonialsTable, id);
+}
+
+export async function deleteAssessment(id) {
+  return deleteRow(env.supabaseAssessmentsTable, id);
+}
+
+export async function deleteReadiness(id) {
+  return deleteRow(env.supabaseReadinessTable, id);
+}
+
+export async function deleteExecutionForm(id) {
+  return deleteRow(env.supabaseExecutionFormsTable, id);
+}
+}
+

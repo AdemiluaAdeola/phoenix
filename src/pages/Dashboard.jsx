@@ -8,6 +8,10 @@ import {
   listReadiness,
   listTestimonials,
   updateTestimonialStatus,
+  deleteTestimonial,
+  deleteAssessment,
+  deleteReadiness,
+  deleteExecutionForm,
 } from '../api/dbClient';
 import { getSupabaseClient } from '../lib/supabaseClient';
 import { downloadCsv } from '../utils/csvExport';
