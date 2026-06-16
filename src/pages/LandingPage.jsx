@@ -32,7 +32,7 @@ const LandingPage = () => {
   return (
     <div className="landing-page animate-fade-slide">
       <nav className="tab-nav" aria-label="Assessment platform navigation">
-        <Link className="tab-btn active" to="/assessment">
+        <Link className="tab-btn" to="/assessment">
           Clarity assessment <span className="tab-badge">Free</span>
         </Link>
         <Link className="tab-btn" to="/assessment?mode=coach">

@@ -114,14 +114,22 @@ const AssessmentPage = () => {
     if (share === 'story') return 'testimonial';
     return 'clarity';
   });
-  const [isUnlocked, setIsUnlocked] = useState(false);
+  const [unlockedTypes, setUnlockedTypes] = useState({
+    readiness: false,
+    execution: false
+  });
   const [passwordInput, setPasswordInput] = useState('');
   const [passwordError, setPasswordError] = useState(false);
 
+  const currentAssessmentType = activeTab === 'execution' ? 'execution' : 'readiness';
+  const isCurrentTabUnlocked = unlockedTypes[currentAssessmentType];
+  const isUnlocked = unlockedTypes.readiness || unlockedTypes.execution;
+
   const handlePasswordSubmit = (e) => {
     e.preventDefault();
-    if (passwordInput === 'phoenix2026') {
-      setIsUnlocked(true);
+    const expectedPassword = currentAssessmentType === 'execution' ? 'execution2027' : 'readiness2027';
+    if (passwordInput === expectedPassword) {
+      setUnlockedTypes(prev => ({ ...prev, [currentAssessmentType]: true }));
       setPasswordError(false);
     } else {
       setPasswordError(true);
@@ -133,11 +141,11 @@ const AssessmentPage = () => {
     return type === 'execution' ? 'Execution Assessment' : 'Readiness Assessment';
   };
 
-  if (mode === 'coach' && !isUnlocked) {
+  if ((activeTab === 'readiness' || activeTab === 'execution') && !isCurrentTabUnlocked) {
     return (
       <div className="coach-lock-overlay">
         <form onSubmit={handlePasswordSubmit} className="coach-lock-card hover-glow">
-          <h3>{getAssessmentTitle(assessmentType)}</h3>
+          <h3>{getAssessmentTitle(currentAssessmentType)}</h3>
           <p>Please enter the authorization code to unlock this assessment.</p>
 
           <div className="form-group">
@@ -211,30 +219,24 @@ const AssessmentPage = () => {
         >
           Clarity assessment <span className="tab-badge">Free</span>
         </button>
-        {(isUnlocked || share === 'story') && (
-          <button 
-            className={`tab-btn ${activeTab === 'testimonial' ? 'active' : ''}`} 
-            onClick={() => setActiveTab('testimonial')}
-          >
-            testimonials
-          </button>
-        )}
-        {isUnlocked && (
-          <>
-            <button 
-              className={`tab-btn ${activeTab === 'readiness' ? 'active' : ''}`} 
-              onClick={() => setActiveTab('readiness')}
-            >
-              readiness assessment <span className="tab-badge">Coach</span>
-            </button>
-            <button 
-              className={`tab-btn ${activeTab === 'execution' ? 'active' : ''}`} 
-              onClick={() => setActiveTab('execution')}
-            >
-              execution assessment <span className="tab-badge">Week 3</span>
-            </button>
-          </>
-        )}
+        <button 
+          className={`tab-btn ${activeTab === 'testimonial' ? 'active' : ''}`} 
+          onClick={() => setActiveTab('testimonial')}
+        >
+          Testimonials
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'readiness' ? 'active' : ''}`} 
+          onClick={() => setActiveTab('readiness')}
+        >
+          Readiness assessment <span className="tab-badge">Coach</span>
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'execution' ? 'active' : ''}`} 
+          onClick={() => setActiveTab('execution')}
+        >
+          Execution assessment <span className="tab-badge">Week 3</span>
+        </button>
       </div>
 
       <div className="hero">
