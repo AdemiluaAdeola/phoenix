@@ -138,10 +138,10 @@ const AssessmentPage = () => {
   };
 
   const getAssessmentTitle = (type) => {
-    return type === 'execution' ? 'Execution Assessment' : 'Readiness Assessment';
+    return type === 'execution' ? 'Execution Assessment' : ' Assessment Locked';
   };
 
-  if ((activeTab === 'readiness' || activeTab === 'execution') && !isCurrentTabUnlocked) {
+  if (mode === 'coach' && (activeTab === 'readiness' || activeTab === 'execution') && !isCurrentTabUnlocked) {
     return (
       <div className="coach-lock-overlay">
         <form onSubmit={handlePasswordSubmit} className="coach-lock-card hover-glow">
