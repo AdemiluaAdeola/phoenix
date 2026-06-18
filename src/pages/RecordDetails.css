@@ -1,0 +1,364 @@
+/* ── Record Details Page ── */
+
+.record-details-shell {
+  width: min(900px, calc(100% - 40px));
+  margin: 0 auto;
+  padding: 36px 0 80px;
+}
+
+/* Loading */
+.record-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 20px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 3px solid rgba(13, 16, 40, 0.1);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+  margin-bottom: 16px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Error */
+.record-error-card {
+  text-align: center;
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1px solid var(--ivory-dark);
+  box-shadow: var(--shadow);
+  padding: 48px 32px;
+}
+
+.record-error-icon {
+  font-size: 2.6rem;
+  margin-bottom: 14px;
+}
+
+.record-error-card p {
+  color: var(--red);
+  font-weight: 700;
+  font-size: 1.05rem;
+  margin-bottom: 20px;
+}
+
+/* Score ring section */
+.record-score-section {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  background: var(--white);
+  border: 1px solid var(--ivory-dark);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 28px 32px;
+  margin-bottom: 18px;
+}
+
+.score-ring-wrap {
+  position: relative;
+  width: 96px;
+  height: 96px;
+  flex-shrink: 0;
+}
+
+.score-ring-svg {
+  width: 100%;
+  height: 100%;
+}
+
+.score-ring-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Playfair Display', serif;
+  font-size: 1.35rem;
+  font-weight: 700;
+  color: var(--navy);
+}
+
+.record-score-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.record-score-title {
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.record-score-subtitle {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.6rem;
+  color: var(--navy);
+  line-height: 1.1;
+}
+
+/* Main details card */
+.record-details-card {
+  background: var(--white);
+  border: 1px solid var(--ivory-dark);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 32px;
+  margin-bottom: 18px;
+}
+
+.record-details-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+
+/* Individual field */
+.detail-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detail-field-label {
+  display: block;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.detail-field-value {
+  color: var(--charcoal);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* Narrative section (testimonials Before/Shift/After) */
+.narrative-section {
+  margin-top: 28px;
+  padding-top: 28px;
+  border-top: 1px solid var(--ivory-dark);
+  display: grid;
+  gap: 24px;
+}
+
+.narrative-section .detail-field-value {
+  background: var(--ivory);
+  border-radius: 12px;
+  padding: 16px 18px;
+  line-height: 1.8;
+  color: var(--charcoal);
+}
+
+/* Responses list */
+.detail-responses,
+.detail-dim-scores {
+  margin-top: 28px;
+  padding-top: 28px;
+  border-top: 1px solid var(--ivory-dark);
+}
+
+.responses-grid {
+  display: grid;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.response-item {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 12px 16px;
+  background: var(--ivory);
+  border-radius: 10px;
+}
+
+.response-q {
+  color: var(--gold);
+  font-weight: 800;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  min-width: 32px;
+  flex-shrink: 0;
+}
+
+.response-a {
+  color: var(--charcoal);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+/* Dimension scores bars */
+.dim-scores-grid {
+  display: grid;
+  gap: 14px;
+  margin-top: 12px;
+}
+
+.dim-score-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.dim-score-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.dim-score-label {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.dim-score-value {
+  font-size: 0.84rem;
+  font-weight: 800;
+  color: var(--gold);
+}
+
+.dim-bar-track {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(13, 16, 40, 0.08);
+  overflow: hidden;
+}
+
+.dim-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--navy), var(--gold));
+  transition: width 0.5s ease;
+}
+
+/* Actions bar */
+.record-actions-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 20px 0;
+}
+
+.record-actions-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.record-action-error {
+  padding: 12px 16px;
+  border: 1px solid rgba(139, 38, 53, 0.18);
+  border-radius: 10px;
+  background: #FAECEE;
+  color: #8B2635;
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+/* Button variants */
+.btn-approve {
+  background: #16a34a;
+  color: var(--white);
+}
+
+.btn-reject {
+  background: var(--red);
+  color: var(--white);
+}
+
+.btn-delete {
+  background: transparent;
+  border: 2px solid var(--red);
+  color: var(--red);
+}
+
+.btn-delete:hover {
+  background: var(--red);
+  color: var(--white);
+}
+
+.btn-delete-confirm {
+  background: var(--red);
+  color: var(--white);
+  animation: shake 0.3s ease;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.btn-sm {
+  padding: 10px 16px;
+  font-size: 0.85rem;
+}
+
+.delete-confirm-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 14px;
+  background: rgba(139, 38, 53, 0.06);
+  border: 1px solid rgba(139, 38, 53, 0.15);
+  border-radius: 14px;
+}
+
+.delete-confirm-text {
+  color: var(--red);
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+/* ── Responsive ── */
+@media (max-width: 680px) {
+  .record-details-shell {
+    width: calc(100% - 28px);
+    padding-top: 24px;
+  }
+
+  .record-details-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .record-score-section {
+    flex-direction: column;
+    text-align: center;
+    padding: 24px 20px;
+  }
+
+  .record-actions-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .record-actions-right {
+    justify-content: center;
+  }
+
+  .delete-confirm-group {
+    flex-direction: column;
+  }
+}

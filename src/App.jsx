@@ -7,6 +7,7 @@ import AssessmentCompletePage from './pages/AssessmentCompletePage';
 import BlogPage from './pages/BlogPage';
 import LoginPage from './pages/LoginPage';
 import Dashboard from './pages/Dashboard';
+import RecordDetails from './pages/RecordDetails';
 import ClientStoriesPage from './pages/ClientStoriesPage';
 
 function App() {
@@ -24,6 +25,14 @@ function App() {
           element={(
             <ProtectedRoute>
               <Dashboard />
+            </ProtectedRoute>
+          )}
+        />
+        <Route
+          path="/dashboard/record/:type/:id"
+          element={(
+            <ProtectedRoute>
+              <RecordDetails />
             </ProtectedRoute>
           )}
         />

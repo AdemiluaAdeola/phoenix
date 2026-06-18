@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { env } from '../config/env';
 import {
   fetchAllRows,
@@ -31,6 +31,7 @@ const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [error, setError] = useState('');
+  const [confirmDeleteId, setConfirmDeleteId] = useState(null);
 
   const getData = useCallback(async () => {
     if (activeTab === 'clarity') {
@@ -146,6 +147,33 @@ const Dashboard = () => {
     }
   };
 
+  // Generic delete handler for any record type
+  const deleteItemHandler = async (id) => {
+    try {
+      setError('');
+      setConfirmDeleteId(null);
+      // Optimistically remove from UI
+      setData(data.filter(item => item.id !== id));
+      // Call appropriate delete function based on active tab
+      if (activeTab === 'testimonials') {
+        await deleteTestimonial(id);
+      } else if (activeTab === 'clarity') {
+        await deleteAssessment(id);
+      } else if (activeTab === 'readiness') {
+        await deleteReadiness(id);
+      } else if (activeTab === 'execution') {
+        await deleteExecutionForm(id);
+      }
+      // Refresh list to ensure consistency
+      setData(await getData());
+    } catch (err) {
+      console.error(err);
+      setError(err.message || 'Unable to delete record.');
+      // Refetch to restore UI if deletion failed
+      setData(await getData());
+    }
+  };
+
   const totalRecords = data.length;
   const scoredRecords = data.filter(item => item.score !== undefined && item.score !== null);
   const averageScore = data.length
@@ -232,7 +260,7 @@ const Dashboard = () => {
               {activeTab === 'clarity' && <th>Archetype</th>}
               {activeTab === 'testimonials' && <th>Stage</th>}
               {activeTab === 'testimonials' && <th>Status</th>}
-              {activeTab === 'testimonials' && <th>Actions</th>}
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -259,7 +287,15 @@ const Dashboard = () => {
                 <tr key={item.id}>
                   <td>{item.id}</td>
                   <td>{new Date(item.date).toLocaleDateString()}</td>
-                  <td>{item.firstName} {item.lastName}</td>
+                  <td>
+                    <Link
+                      to={`/dashboard/record/${activeTab}/${item.id}`}
+                      className="name-link"
+                      title="View full details"
+                    >
+                      {item.firstName} {item.lastName}
+                    </Link>
+                  </td>
                   {(activeTab === 'clarity' || activeTab === 'readiness' || activeTab === 'execution') && <td><span className="score-badge">{item.score}%</span></td>}
                   {activeTab === 'clarity' && <td>{item.archetypeName || item.archetype}</td>}
                   {activeTab === 'testimonials' && <td>{item.stage}</td>}
@@ -270,16 +306,25 @@ const Dashboard = () => {
                       </span>
                     </td>
                   )}
-                  {activeTab === 'testimonials' && (
-                    <td>
-                      {item.status === 'Pending Review' && (
-                        <div className="row-actions">
+                  <td>
+                    <div className="row-actions">
+                      {activeTab === 'testimonials' && item.status === 'Pending Review' && (
+                        <>
                           <button onClick={() => approveTestimonial(item.id)} className="mini-btn approve">Approve</button>
                           <button onClick={() => rejectTestimonial(item.id)} className="mini-btn reject">Reject</button>
-                        </div>
+                        </>
                       )}
-                    </td>
-                  )}
+                      {confirmDeleteId === item.id ? (
+                        <div className="delete-confirm-inline">
+                          <span className="delete-confirm-label">Delete?</span>
+                          <button onClick={() => deleteItemHandler(item.id)} className="mini-btn delete-yes">Yes</button>
+                          <button onClick={() => setConfirmDeleteId(null)} className="mini-btn delete-no">No</button>
+                        </div>
+                      ) : (
+                        <button onClick={() => setConfirmDeleteId(item.id)} className="mini-btn delete" title="Delete this record">🗑 Delete</button>
+                      )}
+                    </div>
+                  </td>
                 </tr>
               ))
             )}

@@ -368,6 +368,7 @@ export async function listExecutionForms() {
 
   handleSupabaseError(error, 'Failed to load execution records.');
   return (data || []).map(mapExecutionForm);
+}
 
 
 // Delete helper functions
@@ -403,5 +404,5 @@ export async function deleteReadiness(id) {
 export async function deleteExecutionForm(id) {
   return deleteRow(env.supabaseExecutionFormsTable, id);
 }
-}
+
 

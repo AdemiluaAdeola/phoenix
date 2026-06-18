@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getSupabaseClient } from '../lib/supabaseClient';
-import { updateTestimonialStatus } from '../api/dbClient';
+import { updateTestimonialStatus, deleteTestimonial } from '../api/dbClient';
 import './StoryDetails.css';
 
 const StoryDetails = () => {
@@ -90,28 +90,47 @@ const StoryDetails = () => {
         <p>{story.after}</p>
       </div>
       {actionError && <div className="story-action-error">{actionError}</div>}
-      <div className="story-actions">
-        <button
-          className="btn btn-primary"
-          disabled={isProcessing}
-          onClick={() => handleAction('Approved')}
-        >
-          Approve
-        </button>
-        <button
-          className="btn btn-danger"
-          disabled={isProcessing}
-          onClick={() => handleAction('Rejected')}
-        >
-          Reject
-        </button>
-        <button
-          className="btn btn-secondary"
-          disabled={isProcessing}
-          onClick={() => navigate('/dashboard')}
-        >
-          Back
-        </button>
+      {story && (
+        <>
+          <button
+            className="btn btn-primary"
+            disabled={isProcessing}
+            onClick={() => handleAction('Approved')}
+          >
+            Approve
+          </button>
+          <button
+            className="btn btn-danger"
+            disabled={isProcessing}
+            onClick={() => handleAction('Rejected')}
+          >
+            Reject
+          </button>
+          <button
+            className="btn btn-warning"
+            disabled={isProcessing}
+            onClick={async () => {
+              try {
+                setError('');
+                await deleteTestimonial(story.id);
+                navigate('/dashboard');
+              } catch (err) {
+                console.error(err);
+                setActionError(err.message || 'Failed to delete story.');
+              }
+            }}
+          >
+            Delete
+          </button>
+          <button
+            className="btn btn-secondary"
+            disabled={isProcessing}
+            onClick={() => navigate('/dashboard')}
+          >
+            Back
+          </button>
+        </>
+      )}
       </div>
     </div>
   );
