@@ -137,28 +137,48 @@ const AssessmentPage = () => {
     }
   };
 
-  const getAssessmentTitle = (type) => {
-    return type === 'execution' ? 'Execution Assessment' : ' Assessment Locked';
+  const getLockContent = (type) => {
+    if (type === 'execution') {
+      return {
+        icon: '📈',
+        title: 'Client Execution Review',
+        subtitle: 'Week 3+ · Coach Only',
+        description: 'This form tracks client action consistency, homework completion, and milestone alignment. Reserved for active program coaches.',
+        placeholder: 'Enter execution access code',
+        btnLabel: 'Unlock Execution Review',
+      };
+    }
+    return {
+      icon: '🔑',
+      title: 'Client Readiness Screening',
+      subtitle: 'Pre-Intake · Coach Only',
+      description: 'This form evaluates a prospective client\'s emotional readiness and bandwidth before enrolling them into the program.',
+      placeholder: 'Enter readiness access code',
+      btnLabel: 'Unlock Readiness Screening',
+    };
   };
 
-  if (mode === 'coach' && (activeTab === 'readiness' || activeTab === 'execution') && !isCurrentTabUnlocked) {
+  if ((activeTab === 'readiness' || activeTab === 'execution') && !isCurrentTabUnlocked) {
+    const lock = getLockContent(currentAssessmentType);
     return (
       <div className="coach-lock-overlay">
         <form onSubmit={handlePasswordSubmit} className="coach-lock-card hover-glow">
-          <h3>{getAssessmentTitle(currentAssessmentType)}</h3>
-          <p>Please enter the authorization code to unlock this assessment.</p>
+          <div className="coach-lock-icon">{lock.icon}</div>
+          <div className="coach-lock-subtitle">{lock.subtitle}</div>
+          <h3>{lock.title}</h3>
+          <p>{lock.description}</p>
 
           <div className="form-group">
             <input 
               type="password" 
-              placeholder="Enter access code" 
+              placeholder={lock.placeholder}
               value={passwordInput}
               onChange={e => setPasswordInput(e.target.value)}
               required
             />
           </div>
           {passwordError && <div className="coach-lock-error">Incorrect code. Try again.</div>}
-          <button type="submit" className="btn btn-primary scale-on-hover" style={{ width: '100%' }}>Unlock Assessment</button>
+          <button type="submit" className="btn btn-primary scale-on-hover" style={{ width: '100%' }}>{lock.btnLabel}</button>
           <div className="coach-lock-footer">
             <p>Don't have an access code?</p>
             <div className="coach-lock-footer-links">
