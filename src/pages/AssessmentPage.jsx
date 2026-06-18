@@ -141,7 +141,7 @@ const AssessmentPage = () => {
     if (type === 'execution') {
       return {
         icon: '📈',
-        title: 'Client Execution Review',
+        title: 'Locked Review',
         subtitle: 'Week 3+ · Coach Only',
         description: 'This form tracks client action consistency, homework completion, and milestone alignment. Reserved for active program coaches.',
         placeholder: 'Enter execution access code',
@@ -150,7 +150,7 @@ const AssessmentPage = () => {
     }
     return {
       icon: '🔑',
-      title: 'Client Readiness Screening',
+      title: 'Locked Access',
       subtitle: 'Pre-Intake · Coach Only',
       description: 'This form evaluates a prospective client\'s emotional readiness and bandwidth before enrolling them into the program.',
       placeholder: 'Enter readiness access code',
