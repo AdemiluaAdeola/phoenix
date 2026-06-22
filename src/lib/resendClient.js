@@ -119,6 +119,7 @@ export async function sendEmailViaSupabaseFunction({
     });
 
     if (invokeError) {
+      console.error('Supabase send-email function invocation error details:', invokeError);
       const message = invokeError.message || 'Failed to invoke email function.';
       const hint = message.includes('Requested function was not found')
         ? ' Deploy the send-email Supabase function and set RESEND_API_KEY as a secret.'
@@ -127,11 +128,13 @@ export async function sendEmailViaSupabaseFunction({
     }
 
     if (data?.error) {
+      console.error('Supabase send-email function returned error:', data.error);
       return { data: null, error: data.error };
     }
 
     return { data, error: null };
   } catch (error) {
+    console.error('Supabase send-email function invocation exception:', error);
     return {
       data: null,
       error: getErrorMessage(error, 'Unable to send email — network error.'),

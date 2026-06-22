@@ -83,6 +83,13 @@ export async function subscribeToConvertKit({ email, firstName, archetype }) {
         },
       });
 
+      if (invokeError) {
+        console.error('Supabase convertkit-subscribe function invocation error details:', invokeError);
+      }
+      if (data?.error) {
+        console.error('Supabase convertkit-subscribe function returned error:', data.error);
+      }
+
       if (!invokeError && !data?.error) {
         return { data, error: null };
       }
@@ -101,6 +108,7 @@ export async function subscribeToConvertKit({ email, firstName, archetype }) {
           'Failed to invoke ConvertKit subscription function.',
       };
     } catch (error) {
+      console.error('Supabase convertkit-subscribe function invocation exception:', error);
       const fallback = await subscribeToConvertKitDirect({ email, firstName });
       if (!fallback.error) {
         return fallback;

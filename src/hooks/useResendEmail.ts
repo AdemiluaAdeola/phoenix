@@ -54,16 +54,19 @@ export const useResendEmail = (): UseResendEmailReturn => {
       );
 
       if (invokeError) {
+        console.error("Supabase send-email function invocation error details:", invokeError);
         throw new Error(invokeError.message);
       }
 
       if (data?.error) {
+        console.error("Supabase send-email function returned error:", data.error);
         throw new Error(data.error);
       }
 
       setSuccess(true);
       return data || null;
     } catch (err) {
+      console.error("Supabase send-email function invocation exception:", err);
       const errorMessage = err instanceof Error ? err.message : "Failed to send email";
       setError(errorMessage);
       return null;
