@@ -8,6 +8,8 @@ interface EmailRequest {
   from?: string;
   replyTo?: string;
   text?: string;
+  bcc?: string | string[];
+  cc?: string | string[];
 }
 
 interface ResendResponse {
@@ -75,6 +77,8 @@ serve(async (req: Request) => {
       html: emailPayload.html,
       ...(emailPayload.text && { text: emailPayload.text }),
       ...(emailPayload.replyTo && { reply_to: emailPayload.replyTo }),
+      ...(emailPayload.bcc && { bcc: emailPayload.bcc }),
+      ...(emailPayload.cc && { cc: emailPayload.cc }),
     };
 
     // Make request to Resend API

@@ -39,6 +39,13 @@ const archetypes = {
 const dimLabels = ['Clarity', 'Confidence', 'Action', 'Alignment', 'Readiness'];
 const dimPhases = ['See It', 'Believe It', 'Achieve It', 'Alignment', 'Readiness'];
 
+/**
+ * Fix 1: Veta gets a BCC copy of every outbound results email so she has
+ * visibility into exactly what clients receive. BCC (not CC) keeps this
+ * invisible to the participant — their copy is unchanged.
+ */
+const INTERNAL_NOTIFICATION_EMAIL = 'veta.hurst@phoenixclearinsight.com';
+
 /* ── HTML email builder ── */
 function buildEmailHTML(data) {
   const score = Math.max(0, Math.min(100, Number(data.score) || 0));
@@ -195,6 +202,7 @@ export const sendAssessmentEmail = async (assessmentData) => {
   const emailHTML = buildEmailHTML(assessmentData);
   const result = await sendEmail({
     to: assessmentData.email,
+    bcc: INTERNAL_NOTIFICATION_EMAIL,
     subject: 'Your Personal Phoenix Clarity Assessment Report',
     html: emailHTML,
     text: buildEmailText(assessmentData),

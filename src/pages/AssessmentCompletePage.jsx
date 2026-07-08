@@ -2,29 +2,8 @@ import { useLocation, Link } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
 import { sendAssessmentEmail, buildEmailHTML } from '../utils/emailService';
 import { subscribeToConvertKit } from '../lib/convertKitClient';
+import { dimFullNames, dimLabels, dimPhases, archetypes } from './assessmentQuestions.js';
 import './AssessmentCompletePage.css';
-
-const dimFullNames = ['Strengths & Skills', 'Values & What Matters', 'Patterns & Blocks', 'Direction & Opportunity', 'Alignment & Confidence'];
-const dimLabels = ['Clarity', 'Confidence', 'Action', 'Alignment', 'Readiness'];
-const dimPhases = ['See It', 'Believe It', 'Achieve It', 'Alignment', 'Readiness'];
-
-const archetypes = {
-  phoenix_momentum: {
-    name: "Phoenix Momentum",
-    intro: `You are in the Phoenix Momentum stage.\n\nYou've figured it out and started building. The direction is clear. The work is real. What you need now isn't more clarity — it's the faith to keep pressing forward even when the tangible proof of your progress hasn't shown up yet. You're closer than you think.`,
-    directRead: `Your scores reveal something most people in your position never get told.\n\nYou have done the hard work of figuring it out. The direction is real. The building is happening. What your scores show is that the gap right now isn't capability or clarity — it's the faith to trust what you're building before the results are fully visible. That is one of the hardest phases of any transformation. Most people stop here because they can't see the proof yet. The Clarity Intensive is where we map exactly what the next chapter requires — and build the conviction to see it through.\n\nBook it.`
-  },
-  dreaming: {
-    name: "Dreaming",
-    intro: `You are in the Dreaming stage.\n\nThe vision is there. You can see exactly what you want. The problem is that you keep waiting for the conditions to be right before you move — and the conditions are never going to be right. That is not a planning problem. That is a belief problem.`,
-    directRead: `Your scores reveal something most people in your position never get told.\n\nYou are not stuck because you lack clarity — you scored well there. You are stuck because some part of you does not yet believe you are allowed to have what you can see. That is a specific, identifiable pattern. I have seen it in dozens of high-achievers at exactly this stage, and I know what breaks it. It is not more planning. It is not more journaling. It is one direct conversation where someone who can see the pattern names it out loud.\n\nThat conversation is the Clarity Intensive. Book it.`
-  },
-  awakening: {
-    name: "Awakening",
-    intro: `You are in the Awakening stage.\n\nYou're still figuring out the pieces and navigating your healing journey. Identity is actively shifting. You're not lost — you're discovering. The discomfort you're feeling isn't a problem to solve. It's a signal that something real is happening.`,
-    directRead: `Your scores reveal something most people in your position never get told.\n\nYou are not behind. You are not broken. You are in the middle of one of the most significant transitions a professional can go through — and you are navigating it without a map. The discomfort is not a signal that something is wrong. It is a signal that something real is happening. What you need right now is not a plan. It is a space where someone who has been exactly where you are can help you see what's actually shifting.\n\nThat space is the Clarity Intensive. Book it.`
-  }
-};
 
 const strengthInsights = [
   'This is where your energy is clearest right now. Notice it — not to feel good about it, but because your next step should start here. Strength without direction is still motion without momentum.',
