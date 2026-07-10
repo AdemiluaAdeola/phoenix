@@ -1,8 +1,7 @@
-# TODO - Fix emailing system
+- [ ] Inspect scoringBands usage in RecordDetails.jsx, Dashboard.jsx, AssessmentCompletePage.jsx (where intro/directRead are rendered)
+- [ ] Draft professional, consistent narrative for each band (Rebuilding, Transitioning, Awakening, Rising) for both `intro` and `directRead`
+- [x] Update `src/pages/scoringBands.js` to replace ⚠️ PLACEHOLDER text with drafted copy
 
-- [x] Step 1: Fix `src/config/env.js` lint/build error (unused `_` in filter destructuring)
-- [x] Step 2: Improve runtime diagnostics for email failures (capture error details in UI/logs)
-- [x] Step 3: Validate assessment payload shape used by email builder (fallbacks for missing fields)
-- [x] Step 4: Run `npm run lint` and `npm run build`, then smoke test email send + resend
+- [ ] Run lint/build/tests (npm test / npm run build) to ensure no syntax issues
 
 
