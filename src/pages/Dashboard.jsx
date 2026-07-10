@@ -216,7 +216,13 @@ const Dashboard = () => {
         </div>
         <div className="admin-stat-card">
           <span>{activeTab === 'testimonials' ? 'Pending Review' : 'Average Score'}</span>
-          <strong>{activeTab === 'testimonials' ? pendingTestimonials : `${Number.isFinite(averageScore) ? averageScore : 0}%`}</strong>
+          <strong>
+            {activeTab === 'testimonials'
+              ? pendingTestimonials
+              : activeTab === 'clarity'
+                ? `${Number.isFinite(averageScore) ? averageScore : 0} / 125`
+                : `${Number.isFinite(averageScore) ? averageScore : 0}%`}
+          </strong>
         </div>
         <div className="admin-stat-card">
           <span>Latest Entry</span>
@@ -257,7 +263,7 @@ const Dashboard = () => {
               <th>Date</th>
               <th>Name</th>
               {(activeTab === 'clarity' || activeTab === 'readiness' || activeTab === 'execution') && <th>Score</th>}
-              {activeTab === 'clarity' && <th>Archetype</th>}
+              {activeTab === 'clarity' && <th>Scoring Band</th>}
               {activeTab === 'testimonials' && <th>Stage</th>}
               {activeTab === 'testimonials' && <th>Status</th>}
               <th>Actions</th>
@@ -296,7 +302,13 @@ const Dashboard = () => {
                       {item.firstName} {item.lastName}
                     </Link>
                   </td>
-                  {(activeTab === 'clarity' || activeTab === 'readiness' || activeTab === 'execution') && <td><span className="score-badge">{item.score}%</span></td>}
+                  {(activeTab === 'clarity' || activeTab === 'readiness' || activeTab === 'execution') && (
+                    <td>
+                      <span className="score-badge">
+                        {activeTab === 'clarity' ? `${item.score} / 125` : `${item.score}%`}
+                      </span>
+                    </td>
+                  )}
                   {activeTab === 'clarity' && <td>{item.archetypeName || item.archetype}</td>}
                   {activeTab === 'testimonials' && <td>{item.stage}</td>}
                   {activeTab === 'testimonials' && (

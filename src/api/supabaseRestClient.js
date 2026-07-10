@@ -48,6 +48,7 @@ function isMissingColumnError(error, columnName) {
 
 export function mapAssessment(row) {
   if (!row) return null;
+  const answers = Array.isArray(row.responses) ? row.responses : [];
   return {
     id: row.id,
     firstName: row.first_name,
@@ -56,7 +57,8 @@ export function mapAssessment(row) {
     identity: row.identity,
     source: row.source,
     context: row.context,
-    responses: row.responses,
+    responses: answers,
+    answers,
     score: row.score,
     archetype: row.archetype,
     archetypeName: archetypeNames[row.archetype] || row.archetype || '',
@@ -84,13 +86,15 @@ export function mapTestimonial(row) {
 
 export function mapReadiness(row) {
   if (!row) return null;
+  const answers = Array.isArray(row.responses) ? row.responses : [];
   return {
     id: row.id,
     firstName: row.first_name,
     lastName: row.last_name,
     email: row.email,
     score: row.score,
-    responses: row.responses,
+    responses: answers,
+    answers,
     sessionType: row.session_type,
     sessionDate: row.session_date,
     date: row.created_at,
@@ -404,5 +408,4 @@ export async function deleteReadiness(id) {
 export async function deleteExecutionForm(id) {
   return deleteRow(env.supabaseExecutionFormsTable, id);
 }
-
 

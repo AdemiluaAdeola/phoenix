@@ -11,9 +11,8 @@ import {
   readinessQuestions,
   executionQuestions,
   dimLabels,
-  archetypes,
-} from './assessmentQuestions.js';
-import { getRawTotal, getScoringBand } from './scoringBands.js';
+} from './assessmentQuestions';
+import { getRawTotal, getScoringBand } from './scoringBands';
 import './RecordDetails.css';
 
 // Maps the :type route param to the right fetch function and display config.
@@ -30,6 +29,33 @@ const questionSetByType = {
   clarity: clarityQuestions.map((q) => q.text),
   readiness: readinessQuestions,
   execution: executionQuestions,
+};
+
+const clarityChoiceLabels = {
+  1: 'Rarely',
+  2: 'Occasionally',
+  3: 'Sometimes',
+  4: 'Frequently',
+  5: 'Consistently',
+};
+
+const getAnswerList = (record) => {
+  if (Array.isArray(record?.answers)) return record.answers;
+  if (Array.isArray(record?.responses)) return record.responses;
+  return [];
+};
+
+const formatChoice = (type, value) => {
+  if (value === null || value === undefined || value === '') return '—';
+
+  const numericValue = Number(value);
+  const score = Number.isFinite(numericValue) ? numericValue : value;
+
+  if (type === 'clarity' && clarityChoiceLabels[numericValue]) {
+    return `${score} / 5 - ${clarityChoiceLabels[numericValue]}`;
+  }
+
+  return `${score} / 5`;
 };
 
 const RecordDetail = () => {
@@ -97,10 +123,16 @@ const RecordDetail = () => {
     );
   }
 
-  const rawTotal = config.hasDimensions ? getRawTotal(record.answers) : null;
+  // Prefer recomputing from the saved answers array — this is robust even for
+  // older clarity records saved before the scoring system changed from a
+  // 0-100 percentage to a raw 25-125 sum. Falls back to the stored `score`
+  // field only if answers weren't saved (very old / partial records).
+  const rawTotal = config.hasDimensions
+    ? (getRawTotal(getAnswerList(record)) ?? record.score ?? null)
+    : null;
   const band = config.hasBand ? getScoringBand(rawTotal) : null;
-  const archetype = record.archetype ? archetypes[record.archetype] : null;
   const questions = questionSetByType[type] || [];
+  const answers = getAnswerList(record);
 
   return (
     <div className="record-detail-shell">
@@ -141,14 +173,15 @@ const RecordDetail = () => {
         ) : (
           <>
             <div className="record-score-row">
-              <div className="record-score-card">
-                <span className="record-score-label">Percentage Score</span>
-                <strong>{record.score}%</strong>
-              </div>
-              {config.hasBand && (
+              {config.hasDimensions ? (
                 <div className="record-score-card">
-                  <span className="record-score-label">Raw Total (25–125 scale)</span>
-                  <strong>{rawTotal ?? '—'}</strong>
+                  <span className="record-score-label">Clarity Score</span>
+                  <strong>{rawTotal ?? '—'} / 125</strong>
+                </div>
+              ) : (
+                <div className="record-score-card">
+                  <span className="record-score-label">Score</span>
+                  <strong>{record.score}%</strong>
                 </div>
               )}
               {config.hasBand && (
@@ -157,28 +190,13 @@ const RecordDetail = () => {
                   <strong>{band ? band.label : '—'}</strong>
                 </div>
               )}
-              {archetype && (
-                <div className="record-score-card">
-                  <span className="record-score-label">Archetype</span>
-                  <strong>{archetype.name}</strong>
-                </div>
-              )}
             </div>
 
             {config.hasBand && band && (
               <div className="record-section record-narrative">
                 <h3>Scoring Band Narrative — {band.label}</h3>
-                <p className="record-narrative-body">{band.narrative}</p>
-              </div>
-            )}
-
-            {archetype && (
-              <div className="record-section record-narrative">
-                <h3>Archetype Narrative — {archetype.name}</h3>
-                <p className="record-narrative-body">{archetype.intro}</p>
-                {archetype.directRead && (
-                  <p className="record-narrative-body">{archetype.directRead}</p>
-                )}
+                <p className="record-narrative-body">{band.intro}</p>
+                <p className="record-narrative-body">{band.directRead}</p>
               </div>
             )}
 
@@ -202,14 +220,16 @@ const RecordDetail = () => {
               </div>
             )}
 
-            {Array.isArray(record.answers) && questions.length > 0 ? (
+            {answers.length > 0 && questions.length > 0 ? (
               <div className="record-section">
                 <h3>Question-by-Question Responses</h3>
                 <ol className="record-qa-list">
                   {questions.map((qText, i) => (
                     <li key={i} className="record-qa-item">
                       <div className="record-qa-question">{qText}</div>
-                      <div className="record-qa-answer">Response: <strong>{record.answers[i] ?? '—'}</strong> / 5</div>
+                      <div className="record-qa-answer">
+                        User's choice: <strong>{formatChoice(type, answers[i])}</strong>
+                      </div>
                     </li>
                   ))}
                 </ol>

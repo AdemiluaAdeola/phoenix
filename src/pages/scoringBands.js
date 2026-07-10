@@ -1,17 +1,18 @@
-// Scoring bands for the Clarity assessment, per Veta's spec:
+// Scoring bands for the Clarity assessment — this REPLACES the old
+// 3-archetype system (Phoenix Momentum / Dreaming / Awakening, which was
+// derived from the 5 dimension scores). Bands are now the single source of
+// truth for classifying a result, driven by the raw total score (25-125),
+// per Veta's spec:
 //   Rebuilding:     25–65
 //   Transitioning:  66–85
 //   Awakening:      86–105
 //   Rising:         106–125
 //
-// IMPORTANT: this is a RAW TOTAL of the 25 questions (each answered 1-5),
-// not the 0-100 percentage that's stored in `score`. The raw total is
-// derived here from the saved `answers` array.
-//
-// NOTE FOR VETA: The `narrative` strings below are PLACEHOLDERS. They are
-// intentionally obvious/awkward so nobody mistakes them for final copy.
-// Replace each one with your actual band narrative before this goes live
-// with real clients viewing full reports.
+// NOTE FOR VETA: `intro` and `directRead` below are PLACEHOLDERS, deliberately
+// obvious so nobody mistakes them for final copy. Replace each with your real
+// band narrative before this goes live for clients viewing full reports —
+// this is now the ONLY narrative shown on the results page, in the email,
+// and in the dashboard, so it needs your actual copy.
 
 export const getRawTotal = (answers) => {
   if (!Array.isArray(answers)) return null;
@@ -24,28 +25,32 @@ export const scoringBands = [
     label: 'Rebuilding',
     min: 25,
     max: 65,
-    narrative: `⚠️ PLACEHOLDER COPY — replace with the real "Rebuilding" band narrative. This text is shown to the coach in the dashboard for participants scoring 25–65.`,
+    intro: `⚠️ PLACEHOLDER — short intro copy for the "Rebuilding" band (25–65). Shown on the results page hero and in the results email.`,
+    directRead: `⚠️ PLACEHOLDER — Veta's direct-read narrative for the "Rebuilding" band (25–65). Shown on the results page, in the email, and in the dashboard detail view.`,
   },
   {
     key: 'transitioning',
     label: 'Transitioning',
     min: 66,
     max: 85,
-    narrative: `⚠️ PLACEHOLDER COPY — replace with the real "Transitioning" band narrative. This text is shown to the coach in the dashboard for participants scoring 66–85.`,
+    intro: `⚠️ PLACEHOLDER — short intro copy for the "Transitioning" band (66–85). Shown on the results page hero and in the results email.`,
+    directRead: `⚠️ PLACEHOLDER — Veta's direct-read narrative for the "Transitioning" band (66–85). Shown on the results page, in the email, and in the dashboard detail view.`,
   },
   {
     key: 'awakening',
     label: 'Awakening',
     min: 86,
     max: 105,
-    narrative: `⚠️ PLACEHOLDER COPY — replace with the real "Awakening" band narrative. This text is shown to the coach in the dashboard for participants scoring 86–105.`,
+    intro: `⚠️ PLACEHOLDER — short intro copy for the "Awakening" band (86–105). Shown on the results page hero and in the results email.`,
+    directRead: `⚠️ PLACEHOLDER — Veta's direct-read narrative for the "Awakening" band (86–105). Shown on the results page, in the email, and in the dashboard detail view.`,
   },
   {
     key: 'rising',
     label: 'Rising',
     min: 106,
     max: 125,
-    narrative: `⚠️ PLACEHOLDER COPY — replace with the real "Rising" band narrative. This text is shown to the coach in the dashboard for participants scoring 106–125.`,
+    intro: `⚠️ PLACEHOLDER — short intro copy for the "Rising" band (106–125). Shown on the results page hero and in the results email.`,
+    directRead: `⚠️ PLACEHOLDER — Veta's direct-read narrative for the "Rising" band (106–125). Shown on the results page, in the email, and in the dashboard detail view.`,
   },
 ];
 
@@ -53,3 +58,5 @@ export const getScoringBand = (rawTotal) => {
   if (rawTotal === null || rawTotal === undefined) return null;
   return scoringBands.find((b) => rawTotal >= b.min && rawTotal <= b.max) || null;
 };
+
+export const getScoringBandByKey = (key) => scoringBands.find((b) => b.key === key) || null;

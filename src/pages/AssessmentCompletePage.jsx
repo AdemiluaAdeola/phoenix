@@ -343,8 +343,8 @@ const AssessmentCompletePage = () => {
           <div className="r2-cta-body">Your results have been sent to your email. The Clarity Intensive is where we take what the assessment surfaced and turn it into a specific, actionable direction — in one session. Most clients leave with more clarity than they got from six months of trying to figure it out alone. There are limited spots. Book yours now.</div>
           <div className="r2-cta-credit">✦ Your $497 Clarity Intensive fee applies as a full credit toward any coaching package if you upgrade within 30 days.</div>
           <div className="r2-cta-buttons">
-            <a href="https://www.phoenixclearinsight.com/book" className="r2-btn-primary scale-on-hover">Book the Clarity Intensive — $497 →</a>
-            <a href="https://www.phoenixclearinsight.com/discovery" className="r2-btn-secondary scale-on-hover">Schedule a Free Discovery Call</a>
+            <a href="https://phoneixclearinsight.as.me/schedule/e8a7e423/appointment/92792406/calendar/14034515" className="r2-btn-primary scale-on-hover">Book Us →</a>
+            <a href="https://www.phoenixclearinsight.com/program" className="r2-btn-secondary scale-on-hover">View Our Program</a>
           </div>
           <div className="r2-scholarship-note">Scholarship pricing available. Ask about it during your discovery call.</div>
         </div>

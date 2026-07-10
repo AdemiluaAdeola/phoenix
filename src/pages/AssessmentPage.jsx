@@ -6,35 +6,9 @@ import {
   clarityQuestions,
   readinessQuestions,
   executionQuestions,
-} from './assessmentQuestions.js';
+} from './assessmentQuestions';
+import { getScoringBand } from './scoringBands';
 import './AssessmentPage.css';
-
-const archetypes = {
-  phoenix_momentum: {
-    name: "Phoenix Momentum",
-  },
-  dreaming: {
-    name: "Dreaming",
-  },
-  awakening: {
-    name: "Awakening",
-  }
-};
-
-const determineArchetypeFromClarity = (dimScores) => {
-  const strengths = dimScores[0];
-  const direction = dimScores[3];
-  const alignment = dimScores[4];
-  const avgTotal = dimScores.reduce((a, b) => a + b, 0) / 5;
-  if (avgTotal < 12) return 'awakening';
-  if (alignment < 14 && direction < 14) return 'awakening';
-  if (direction >= 18 && alignment < 16) return 'dreaming';
-  if (direction >= 17 && strengths < 16) return 'dreaming';
-  if (strengths >= 17 && direction >= 16 && alignment >= 14) return 'phoenix_momentum';
-  if (avgTotal < 15) return 'awakening';
-  if (direction >= 16) return 'dreaming';
-  return 'phoenix_momentum';
-};
 
 const AssessmentPage = () => {
   const navigate = useNavigate();
@@ -236,8 +210,8 @@ const ClarityAssessment = ({ navigate }) => {
   };
 
   const calculateScore = () => {
-    const total = answers.reduce((acc, val) => acc + (val || 0), 0);
-    return Math.round((total / (clarityQuestions.length * 5)) * 100);
+    // Raw sum of all 25 questions (each scored 1-5) — score/125, no percentage conversion.
+    return answers.reduce((acc, val) => acc + (val || 0), 0);
   };
 
   const calculateDimensionScores = () => {
@@ -263,15 +237,15 @@ const ClarityAssessment = ({ navigate }) => {
 
     const score = calculateScore();
     const dimScores = calculateDimensionScores();
-    const archetype = determineArchetypeFromClarity(dimScores);
+    const band = getScoringBand(score);
     const assessmentData = {
       ...formData,
       date: new Date().toISOString(),
       answers,
       score,
       dimScores,
-      archetype,
-      archetypeName: archetypes[archetype].name
+      archetype: band?.key || null,
+      archetypeName: band?.label || null,
     };
 
     try {
